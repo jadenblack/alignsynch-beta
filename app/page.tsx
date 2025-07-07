@@ -2,7 +2,25 @@
 
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Brain, Zap, Trophy, BarChart3, Plus, ArrowRight } from "lucide-react"
+import {
+  Brain,
+  Zap,
+  Trophy,
+  BarChart3,
+  Settings,
+  Users,
+  FileText,
+  GitBranch,
+  Activity,
+  Shield,
+  Database,
+  Globe,
+  ExternalLink,
+  Code,
+  BookOpen,
+  Target,
+  Sparkles,
+} from "lucide-react"
 
 export default function Home() {
   return (
@@ -109,104 +127,336 @@ export default function Home() {
           </div>
         </section>
 
-        {/* New Customizable Content Section */}
-        <section className="py-16 md:py-24 bg-gradient-to-br from-background via-muted/30 to-background relative overflow-hidden">
+        {/* Application Navigation Grid Section */}
+        <section className="py-16 md:py-20 bg-gradient-to-br from-muted/30 via-background to-muted/50 relative overflow-hidden">
           {/* Background decoration */}
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-warmth/20 to-connection/20 blur-3xl animate-connection-flow"></div>
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-10 left-20 w-24 h-24 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 blur-2xl animate-connection-flow"></div>
             <div
-              className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-gradient-to-br from-collaboration/20 to-empathy/20 blur-3xl animate-connection-flow"
-              style={{ animationDelay: "2s" }}
+              className="absolute bottom-20 right-20 w-32 h-32 rounded-full bg-gradient-to-br from-collaboration/30 to-celebration/30 blur-2xl animate-connection-flow"
+              style={{ animationDelay: "3s" }}
+            ></div>
+            <div
+              className="absolute top-1/2 left-1/3 w-20 h-20 rounded-full bg-gradient-to-br from-warmth/30 to-empathy/30 blur-2xl animate-connection-flow"
+              style={{ animationDelay: "1.5s" }}
             ></div>
           </div>
 
-          <div className="container-emotional relative z-10">
-            {/* Section Header - Customizable */}
+          <div className="container mx-auto px-4 relative z-10">
+            {/* Section Header */}
             <div className="text-center mb-12 md:mb-16">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-                <Plus className="h-4 w-4" />
-                <span>Customizable Content Area</span>
+                <Globe className="h-4 w-4" />
+                <span>Application Hub</span>
               </div>
-              <h2 className="text-connection text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-                Ready for Your Content
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-collaboration to-accent bg-clip-text text-transparent">
+                Explore AlignSynch
               </h2>
-              <p className="text-empathy text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-                This flexible section is designed to accommodate any type of content you want to showcase. From
-                announcements to featured content, testimonials to interactive elements.
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Quick access to all key sections, dashboards, and management tools. Navigate seamlessly between
+                learning, analytics, and administration.
               </p>
             </div>
 
-            {/* Content Grid - Fully Customizable */}
-            <div className="grid-collaborative">
-              {/* Content Block 1 */}
-              <div className="connection-card p-8 group cursor-pointer">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-collaboration flex items-center justify-center">
-                    <Plus className="h-6 w-6 text-white" />
+            {/* Navigation Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {/* Core Application Pages */}
+              <Link href="/categories" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                      <Code className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Core</div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Programming Languages
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Browse and select from various programming languages and topics
+                  </p>
                 </div>
-                <h3 className="text-warmth text-xl font-semibold mb-3">Content Block One</h3>
-                <p className="text-empathy mb-4">
-                  This is a placeholder for your first piece of content. You can add anything here - from feature
-                  highlights to user testimonials.
-                </p>
-                <div className="empathy-badge">
-                  <span>Customizable</span>
-                </div>
-              </div>
+              </Link>
 
-              {/* Content Block 2 */}
-              <div className="connection-card p-8 group cursor-pointer">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-accent to-celebration flex items-center justify-center">
-                    <Plus className="h-6 w-6 text-white" />
+              <Link href="/quiz/new" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                      <Zap className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Quiz</div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Create New Quiz
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Start a new AI-generated coding quiz tailored to your skill level
+                  </p>
                 </div>
-                <h3 className="text-warmth text-xl font-semibold mb-3">Content Block Two</h3>
-                <p className="text-empathy mb-4">
-                  Another flexible content area that adapts to your needs. Perfect for showcasing different aspects of
-                  your platform or service.
-                </p>
-                <div className="empathy-badge">
-                  <span>Flexible</span>
-                </div>
-              </div>
+              </Link>
 
-              {/* Content Block 3 */}
-              <div className="connection-card p-8 group cursor-pointer">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-growth to-warmth flex items-center justify-center">
-                    <Plus className="h-6 w-6 text-white" />
+              <Link href="/leaderboard" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                      <Trophy className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Social</div>
                   </div>
-                  <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Leaderboard
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    View global rankings and compete with other developers
+                  </p>
                 </div>
-                <h3 className="text-warmth text-xl font-semibold mb-3">Content Block Three</h3>
-                <p className="text-empathy mb-4">
-                  The third customizable area in this responsive grid. Easily modify or replace with your own content
-                  and styling.
-                </p>
-                <div className="empathy-badge">
-                  <span>Responsive</span>
+              </Link>
+
+              <Link href="/profile" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                      <Users className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">User</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    User Profile
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    View your progress, achievements, and learning statistics
+                  </p>
                 </div>
-              </div>
+              </Link>
+
+              {/* Dashboard & Analytics */}
+              <Link href="/dashboard" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center">
+                      <BarChart3 className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Analytics</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Project Dashboard
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    GitHub workflow management and project approval system
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/cicd" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-teal-500 to-teal-600 flex items-center justify-center">
+                      <GitBranch className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">DevOps</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    CI/CD Pipeline
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Monitor build status, deployments, and pipeline health
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/sitemap" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Structure</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Site Architecture
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Visual sitemap with user flows and page relationships</p>
+                </div>
+              </Link>
+
+              <Link href="/integration-analysis" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                      <Activity className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Analysis</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Integration Analysis
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Design token compatibility and system integration reports
+                  </p>
+                </div>
+              </Link>
+
+              {/* Design & Documentation */}
+              <Link href="/design-system" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+                      <Sparkles className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Design</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Design System
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Component library, tokens, and design documentation</p>
+                </div>
+              </Link>
+
+              <Link href="/design-showcase" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                      <Target className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Showcase</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    Design Showcase
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Interactive demonstration of AlignUI emotional design principles
+                  </p>
+                </div>
+              </Link>
+
+              <Link href="/settings" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-primary/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-gray-500 to-gray-600 flex items-center justify-center">
+                      <Settings className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">Config</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-primary transition-colors">
+                    User Settings
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Customize preferences, themes, and account settings</p>
+                </div>
+              </Link>
+
+              <Link href="/admin" className="group">
+                <div className="bg-card hover:bg-card/80 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-red-300">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center">
+                      <Shield className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full">Admin</div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-red-600 transition-colors">
+                    Admin Directory
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    System administration, deployment checklist, and monitoring
+                  </p>
+                </div>
+              </Link>
+
+              {/* External Vercel Links */}
+              <a href="https://vercel.com/dashboard" target="_blank" rel="noopener noreferrer" className="group">
+                <div className="bg-gradient-to-br from-black/5 to-black/10 hover:from-black/10 hover:to-black/15 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-black/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-black flex items-center justify-center">
+                      <Globe className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">External</div>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-black transition-colors">
+                    Vercel Dashboard
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Deployment management, analytics, and project settings
+                  </p>
+                </div>
+              </a>
+
+              <a href="https://vercel.com/analytics" target="_blank" rel="noopener noreferrer" className="group">
+                <div className="bg-gradient-to-br from-black/5 to-black/10 hover:from-black/10 hover:to-black/15 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-black/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-black flex items-center justify-center">
+                      <BarChart3 className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">External</div>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-black transition-colors">
+                    Vercel Analytics
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Real-time performance metrics and user behavior insights
+                  </p>
+                </div>
+              </a>
+
+              <a href="https://vercel.com/storage" target="_blank" rel="noopener noreferrer" className="group">
+                <div className="bg-gradient-to-br from-black/5 to-black/10 hover:from-black/10 hover:to-black/15 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-black/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-black flex items-center justify-center">
+                      <Database className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">External</div>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-black transition-colors">
+                    Vercel Storage
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Database management, blob storage, and data services</p>
+                </div>
+              </a>
+
+              <a href="https://vercel.com/docs" target="_blank" rel="noopener noreferrer" className="group">
+                <div className="bg-gradient-to-br from-black/5 to-black/10 hover:from-black/10 hover:to-black/15 border border-border/50 rounded-xl p-6 shadow-sm hover:shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-black/30">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-lg bg-black flex items-center justify-center">
+                      <BookOpen className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">External</div>
+                      <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-2 group-hover:text-black transition-colors">
+                    Vercel Documentation
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Platform guides, API references, and best practices</p>
+                </div>
+              </a>
             </div>
 
-            {/* Call-to-Action Area - Customizable */}
-            <div className="text-center mt-12 md:mt-16">
-              <div className="inline-flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="collaborative-button">
-                  <span>Primary Action</span>
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-                <Button size="lg" variant="outline" className="warmth-glow bg-transparent">
-                  Secondary Action
-                </Button>
+            {/* Quick Stats */}
+            <div className="mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-4 rounded-lg bg-card/50 border border-border/30">
+                <div className="text-2xl font-bold text-primary mb-1">16</div>
+                <div className="text-sm text-muted-foreground">Application Pages</div>
               </div>
-              <p className="text-intimate text-muted-foreground mt-4">
-                Customize these buttons and actions to match your specific needs
-              </p>
+              <div className="text-center p-4 rounded-lg bg-card/50 border border-border/30">
+                <div className="text-2xl font-bold text-collaboration mb-1">4</div>
+                <div className="text-sm text-muted-foreground">External Links</div>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-card/50 border border-border/30">
+                <div className="text-2xl font-bold text-celebration mb-1">8</div>
+                <div className="text-sm text-muted-foreground">Dashboard Views</div>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-card/50 border border-border/30">
+                <div className="text-2xl font-bold text-growth mb-1">100%</div>
+                <div className="text-sm text-muted-foreground">Responsive</div>
+              </div>
             </div>
           </div>
         </section>
