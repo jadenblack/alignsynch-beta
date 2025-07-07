@@ -1,0 +1,291 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Core Brand Colors - Emotional & Warm */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    /* Primary - Warm Purple for Connection */
+    --primary: 263 85% 65%;
+    --primary-foreground: 0 0% 98%;
+    --primary-soft: 263 45% 92%;
+
+    /* Secondary - Soft Relationship Tones */
+    --secondary: 340 15% 95%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    /* Accent - Warm Coral for Engagement */
+    --accent: 14 83% 73%;
+    --accent-foreground: 0 0% 98%;
+    --accent-soft: 14 45% 95%;
+
+    /* Emotional Color Palette */
+    --warmth: 25 95% 85%;
+    --warmth-foreground: 25 45% 25%;
+    --connection: 200 85% 75%;
+    --connection-foreground: 200 45% 25%;
+    --growth: 120 65% 75%;
+    --growth-foreground: 120 35% 25%;
+    --celebration: 45 95% 80%;
+    --celebration-foreground: 45 45% 25%;
+
+    /* Neutral Palette - Soft & Approachable */
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 263 85% 65%;
+    --radius: 0.75rem;
+
+    /* Semantic Colors */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --success: 142 76% 36%;
+    --success-foreground: 355 7% 97%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 48 96% 89%;
+
+    /* Relationship & Collaboration Specific */
+    --collaboration: 280 65% 75%;
+    --collaboration-foreground: 280 35% 25%;
+    --empathy: 320 45% 85%;
+    --empathy-foreground: 320 25% 35%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 263 85% 70%;
+    --primary-foreground: 240 10% 3.9%;
+    --primary-soft: 263 25% 15%;
+
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+
+    --accent: 14 83% 68%;
+    --accent-foreground: 240 10% 3.9%;
+    --accent-soft: 14 25% 15%;
+
+    --warmth: 25 65% 45%;
+    --warmth-foreground: 25 85% 85%;
+    --connection: 200 65% 55%;
+    --connection-foreground: 200 85% 85%;
+    --growth: 120 45% 55%;
+    --growth-foreground: 120 65% 85%;
+    --celebration: 45 75% 60%;
+    --celebration-foreground: 45 95% 90%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263 85% 70%;
+
+    --collaboration: 280 45% 55%;
+    --collaboration-foreground: 280 65% 85%;
+    --empathy: 320 25% 25%;
+    --empathy-foreground: 320 45% 85%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Emotional Design Components */
+@layer components {
+  .connection-card {
+    @apply relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-soft via-background to-accent-soft border border-primary/20 shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .connection-card::before {
+    content: "";
+    @apply absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 blur-2xl;
+  }
+
+  .warmth-glow {
+    @apply relative;
+  }
+
+  .warmth-glow::after {
+    content: "";
+    @apply absolute inset-0 rounded-inherit bg-gradient-to-r from-warmth/30 via-transparent to-connection/30 opacity-0 transition-opacity duration-300;
+  }
+
+  .warmth-glow:hover::after {
+    @apply opacity-100;
+  }
+
+  .collaborative-button {
+    @apply relative overflow-hidden bg-gradient-to-r from-primary to-collaboration text-primary-foreground rounded-xl px-6 py-3 font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg;
+  }
+
+  .collaborative-button::before {
+    content: "";
+    @apply absolute inset-0 bg-gradient-to-r from-accent/20 to-primary/20 opacity-0 transition-opacity duration-300;
+  }
+
+  .collaborative-button:hover::before {
+    @apply opacity-100;
+  }
+
+  .empathy-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-empathy text-empathy-foreground text-sm font-medium border border-empathy-foreground/20;
+  }
+
+  .relationship-indicator {
+    @apply flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-connection/20 to-collaboration/20 border border-connection/30;
+  }
+
+  .emotional-progress {
+    @apply relative h-3 bg-muted rounded-full overflow-hidden;
+  }
+
+  .emotional-progress::after {
+    content: "";
+    @apply absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-accent to-celebration rounded-full transition-all duration-500;
+    width: var(--progress, 0%);
+  }
+
+  .celebration-burst {
+    @apply animate-pulse bg-gradient-to-r from-celebration via-accent to-primary text-celebration-foreground;
+  }
+}
+
+/* Typography Scale - Emotional & Approachable */
+@layer components {
+  .text-hero {
+    @apply text-4xl md:text-6xl font-bold leading-tight tracking-tight;
+  }
+
+  .text-connection {
+    @apply text-2xl md:text-3xl font-semibold leading-snug;
+  }
+
+  .text-warmth {
+    @apply text-lg md:text-xl font-medium leading-relaxed;
+  }
+
+  .text-empathy {
+    @apply text-base font-normal leading-relaxed text-muted-foreground;
+  }
+
+  .text-intimate {
+    @apply text-sm font-medium leading-relaxed;
+  }
+}
+
+/* Animation System - Gentle & Engaging */
+@layer components {
+  .animate-gentle-bounce {
+    animation: gentleBounce 3s ease-in-out infinite;
+  }
+
+  .animate-warm-pulse {
+    animation: warmPulse 2s ease-in-out infinite;
+  }
+
+  .animate-connection-flow {
+    animation: connectionFlow 4s ease-in-out infinite;
+  }
+
+  .animate-collaborative-slide {
+    animation: collaborativeSlide 0.5s ease-out;
+  }
+}
+
+@keyframes gentleBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes warmPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0);
+  }
+}
+
+@keyframes connectionFlow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes collaborativeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design Patterns */
+@layer components {
+  .container-emotional {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .grid-collaborative {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8;
+  }
+
+  .flex-relationship {
+    @apply flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6;
+  }
+}
+
+/* Accessibility Enhancements */
+@layer components {
+  .focus-emotional {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background;
+  }
+
+  .sr-emotional {
+    @apply sr-only;
+  }
+}
+
+/* Custom Utilities
+   -------------------------------------------------------------------------- */
+@layer utilities {
+  /* Inherit the parent element’s border-radius (needed by .warmth-glow::after) */
+  .rounded-inherit {
+    border-radius: inherit;
+  }
+}
