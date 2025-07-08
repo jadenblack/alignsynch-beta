@@ -1,3 +1,14 @@
+/**
+ * --------------------------------------------------------------------------
+ * AlignSynch · Sitemap & User-Flow Data
+ * --------------------------------------------------------------------------
+ *  • PageNode  – typed description for every route
+ *  • sitePages – complete list of pages consumed by the sitemap,
+ *                navigation components, and docs
+ *  • userFlows – high-level journeys used by the flow-diagram component
+ * --------------------------------------------------------------------------
+ */
+
 export interface PageNode {
   id: string
   title: string
@@ -17,6 +28,10 @@ export interface PageNode {
   connections: string[]
   status: "live" | "development" | "planned"
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Pages                                                                     */
+/* -------------------------------------------------------------------------- */
 
 export const sitePages: PageNode[] = [
   {
@@ -58,83 +73,10 @@ export const sitePages: PageNode[] = [
     status: "live",
   },
   {
-    id: "our-journey",
-    title: "Our Journey",
-    path: "/our-journey",
-    description: "A timeline of a couple's shared milestones and growth.",
-    category: "user",
-    wireframe: {
-      layout: "dashboard",
-      components: ["Header", "Timeline", "Milestone Cards", "Growth Chart", "Footer"],
-    },
-    metrics: {
-      avgTimeOnPage: "3:20",
-      bounceRate: "25%",
-    },
-    connections: ["home", "profile"],
-    status: "live",
-  },
-  {
-    id: "login",
-    title: "Login",
-    path: "/login",
-    description: "User sign-in to access their relationship dashboard.",
-    category: "auth",
-    wireframe: {
-      layout: "form",
-      components: ["Header", "Login Form", "Social Auth", "Footer"],
-      primaryAction: "Sign In",
-    },
-    metrics: {
-      avgTimeOnPage: "1:15",
-      bounceRate: "18%",
-      conversionRate: "80%",
-    },
-    connections: ["home", "signup", "profile"],
-    status: "live",
-  },
-  {
-    id: "signup",
-    title: "Sign Up",
-    path: "/signup",
-    description: "User registration to start their alignment journey.",
-    category: "auth",
-    wireframe: {
-      layout: "form",
-      components: ["Header", "Registration Form", "Partner Invite", "Footer"],
-      primaryAction: "Create Account",
-    },
-    metrics: {
-      avgTimeOnPage: "2:10",
-      bounceRate: "25%",
-      conversionRate: "68%",
-    },
-    connections: ["home", "login", "profile"],
-    status: "live",
-  },
-  {
-    id: "profile",
-    title: "Profile",
-    path: "/profile",
-    description: "Personal dashboard with session history and achievements.",
-    category: "user",
-    wireframe: {
-      layout: "dashboard",
-      components: ["Header", "Profile Card", "Stats Grid", "Recent Activity", "Badges"],
-      primaryAction: "Start New Session",
-    },
-    metrics: {
-      avgTimeOnPage: "4:35",
-      bounceRate: "16%",
-    },
-    connections: ["settings", "session-new", "home", "dashboard"],
-    status: "live",
-  },
-  {
     id: "dashboard",
     title: "Relationship Dashboard",
     path: "/dashboard",
-    description: "A shared dashboard for a couple to view their connection status.",
+    description: "Shared dashboard for partners to view their connection status and goals.",
     category: "user",
     wireframe: {
       layout: "dashboard",
@@ -145,24 +87,6 @@ export const sitePages: PageNode[] = [
       bounceRate: "15%",
     },
     connections: ["profile", "session-new"],
-    status: "live",
-  },
-  {
-    id: "settings",
-    title: "Settings",
-    path: "/settings",
-    description: "Manage account, notifications, and relationship preferences.",
-    category: "user",
-    wireframe: {
-      layout: "settings",
-      components: ["Header", "Settings Tabs", "Profile Form", "Partner Connection", "Preferences"],
-      primaryAction: "Save Settings",
-    },
-    metrics: {
-      avgTimeOnPage: "3:40",
-      bounceRate: "11%",
-    },
-    connections: ["profile"],
     status: "live",
   },
   {
@@ -188,7 +112,7 @@ export const sitePages: PageNode[] = [
     id: "session-play",
     title: "Alignment Session",
     path: "/session/play",
-    description: "Interactive dialogue to foster understanding and alignment.",
+    description: "Interactive dialogue to foster understanding and alignment between partners.",
     category: "session",
     wireframe: {
       layout: "detail",
@@ -207,7 +131,7 @@ export const sitePages: PageNode[] = [
     id: "session-results",
     title: "Session Results",
     path: "/session/results",
-    description: "Summary of alignment session with insights and action items.",
+    description: "Summary of alignment session with insights and practical action items.",
     category: "session",
     wireframe: {
       layout: "detail",
@@ -219,34 +143,109 @@ export const sitePages: PageNode[] = [
       bounceRate: "22%",
       conversionRate: "48%",
     },
-    connections: ["session-new", "profile", "our-journey"],
+    connections: ["session-new", "profile", "dashboard"],
+    status: "live",
+  },
+  {
+    id: "profile",
+    title: "Profile",
+    path: "/profile",
+    description: "Personal dashboard with session history, achievements, and settings link.",
+    category: "user",
+    wireframe: {
+      layout: "dashboard",
+      components: ["Header", "Profile Card", "Stats Grid", "Recent Activity", "Badges"],
+      primaryAction: "Start New Session",
+    },
+    metrics: {
+      avgTimeOnPage: "4:35",
+      bounceRate: "16%",
+    },
+    connections: ["settings", "session-new"],
+    status: "live",
+  },
+  {
+    id: "settings",
+    title: "Settings",
+    path: "/settings",
+    description: "Manage account, notifications, and relationship preferences for AlignSynch.",
+    category: "user",
+    wireframe: {
+      layout: "settings",
+      components: ["Header", "Settings Tabs", "Profile Form", "Partner Connection", "Preferences"],
+      primaryAction: "Save Settings",
+    },
+    metrics: {
+      avgTimeOnPage: "3:40",
+      bounceRate: "11%",
+    },
+    connections: ["profile"],
+    status: "live",
+  },
+  {
+    id: "login",
+    title: "Login",
+    path: "/login",
+    description: "User sign-in to access their relationship dashboard.",
+    category: "auth",
+    wireframe: {
+      layout: "form",
+      components: ["Header", "Login Form", "Social Auth", "Footer"],
+      primaryAction: "Sign In",
+    },
+    metrics: {
+      avgTimeOnPage: "1:15",
+      bounceRate: "18%",
+      conversionRate: "80%",
+    },
+    connections: ["home", "signup", "profile"],
+    status: "live",
+  },
+  {
+    id: "signup",
+    title: "Sign Up",
+    path: "/signup",
+    description: "Create an account to begin the alignment journey.",
+    category: "auth",
+    wireframe: {
+      layout: "form",
+      components: ["Header", "Registration Form", "Partner Invite", "Footer"],
+      primaryAction: "Create Account",
+    },
+    metrics: {
+      avgTimeOnPage: "2:10",
+      bounceRate: "25%",
+      conversionRate: "68%",
+    },
+    connections: ["home", "login"],
     status: "live",
   },
 ]
 
-/* ------------------------------------------------------------------ */
-/*  User-journey flows for AlignSynch                                 */
-/* ------------------------------------------------------------------ */
+/* -------------------------------------------------------------------------- */
+/*  User Flows                                                                */
+/* -------------------------------------------------------------------------- */
+
 export const userFlows = [
   {
-    id: "new-user-onboarding",
-    title: "New User Onboarding",
-    description: "First-time couple journey from landing page to first alignment session.",
+    id: "onboarding",
+    title: "New Couple On-boarding",
+    description: "Journey for first-time users from landing page to first alignment session.",
     steps: ["home", "signup", "focus-areas", "session-new", "session-play", "session-results", "dashboard"],
     conversionRate: "38%",
   },
   {
-    id: "returning-user",
-    title: "Returning User Quick Session",
-    description: "Existing couple jumping straight into a new alignment session.",
-    steps: ["home", "login", "dashboard", "session-new", "session-play", "session-results"],
+    id: "weekly-sync",
+    title: "Weekly Alignment Session",
+    description: "Returning partners completing their regular check-in session.",
+    steps: ["dashboard", "session-new", "session-play", "session-results", "dashboard"],
     conversionRate: "82%",
   },
   {
     id: "growth-tracking",
     title: "Growth-Tracking Journey",
-    description: "Couple reviewing progress and adding new milestones.",
-    steps: ["dashboard", "our-journey", "session-new", "session-play", "session-results", "dashboard"],
+    description: "Couple reviewing progress and adding new milestones to their journey.",
+    steps: ["dashboard", "session-results", "focus-areas", "session-new", "session-play", "dashboard"],
     conversionRate: "54%",
   },
 ]

@@ -1,52 +1,61 @@
 /**
- * Temporary mock CI/CD data so the dashboard and related components
- * compile. Replace or extend with real AlignSynch pipeline data later.
+ * --------------------------------------------------------------------------
+ * AlignSynch · Mock CI/CD Pipeline Runs
+ * --------------------------------------------------------------------------
+ * These are consumed by the <PipelineStatus /> component for demos and tests.
+ * --------------------------------------------------------------------------
  */
-
-export interface PipelineStage {
-  id: string
-  name: string
-  status: "pending" | "running" | "success" | "failure" | "cancelled" | "skipped"
-  duration?: number
-}
 
 export interface PipelineRun {
   id: string
-  runNumber: number
+  status: "success" | "failed" | "running" | "queued"
   branch: string
-  status: "pending" | "running" | "success" | "failure"
+  commit: string
+  author: string
   startTime: string
-  endTime?: string
-  stages: PipelineStage[]
+  duration: string
+  logsUrl: string
 }
-
-export interface PipelineMetrics {
-  totalRuns: number
-  successRate: number
-  averageDuration: string
-}
-
-/* ------------------------------------------------------------------ */
-/*  ✔ REQUIRED EXPORTS                                                */
-/* ------------------------------------------------------------------ */
 
 export const mockPipelineRuns: PipelineRun[] = [
   {
-    id: "run-001",
-    runNumber: 21,
+    id: "build-1027",
+    status: "success",
     branch: "main",
+    commit: "2a57c1e",
+    author: "alice",
+    startTime: "2025-07-07T14:23:00Z",
+    duration: "2m 31s",
+    logsUrl: "https://example.com/logs/build-1027",
+  },
+  {
+    id: "build-1028",
+    status: "failed",
+    branch: "main",
+    commit: "c4d9b35",
+    author: "bob",
+    startTime: "2025-07-08T08:02:00Z",
+    duration: "1m 45s",
+    logsUrl: "https://example.com/logs/build-1028",
+  },
+  {
+    id: "build-1029",
     status: "running",
-    startTime: "2025-07-08T18:00:00Z",
-    stages: [
-      { id: "lint", name: "Lint & Type-check", status: "success", duration: 120 },
-      { id: "unit", name: "Unit Tests", status: "success", duration: 180 },
-      { id: "build", name: "Build", status: "running" },
-    ],
+    branch: "feature/session-export",
+    commit: "e7f12ab",
+    author: "carol",
+    startTime: "2025-07-08T18:10:00Z",
+    duration: "—", // still running
+    logsUrl: "https://example.com/logs/build-1029",
+  },
+  {
+    id: "build-1030",
+    status: "queued",
+    branch: "dependabot/npm-updates",
+    commit: "1d3f5d0",
+    author: "dependabot",
+    startTime: "—",
+    duration: "—",
+    logsUrl: "https://example.com/logs/build-1030",
   },
 ]
-
-export const pipelineMetrics: PipelineMetrics = {
-  totalRuns: 21,
-  successRate: 90,
-  averageDuration: "4 m 50 s",
-}
