@@ -2,15 +2,15 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { cn } from "@/lib/utils"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SiteFooter } from "@/components/layout/site-footer"
+import { cn } from "@/lib/utils"
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "AlignSynch - Relationship Alignment",
-  description: "A web application to foster connection and understanding between partners.",
+  title: "AlignSynch - Deepen Your Connection",
+  description: "A relationship alignment application to help partners grow together.",
   icons: {
     icon: "/favicon.ico",
   },
@@ -23,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
+    <html lang="en" className="light">
+      <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
         <div className="relative flex min-h-screen flex-col">
           <SiteHeader />
           <main className="flex-1">{children}</main>
