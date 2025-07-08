@@ -1,9 +1,10 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Brain, Menu, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -21,11 +22,10 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Brain className="h-8 w-8 text-primary" />
-          <h1 className="text-2xl font-bold">AlignSynch</h1>
+          <Image src="/logo.png" alt="AlignSynch Logo" width={160} height={25} priority />
         </Link>
 
         {/* Desktop Navigation */}
@@ -50,7 +50,7 @@ export function SiteHeader() {
             <Button variant="outline">Login</Button>
           </Link>
           <Link href="/signup">
-            <Button>Sign Up</Button>
+            <Button className="highlight-button">Sign Up</Button>
           </Link>
         </div>
 
@@ -91,7 +91,7 @@ export function SiteHeader() {
                 </Button>
               </Link>
               <Link href="/signup" className="flex-1">
-                <Button className="w-full">Sign Up</Button>
+                <Button className="w-full highlight-button">Sign Up</Button>
               </Link>
             </div>
           </div>

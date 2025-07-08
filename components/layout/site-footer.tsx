@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Brain } from "lucide-react"
+import Image from "next/image"
 
 const footerLinks = {
   product: [
@@ -23,15 +23,14 @@ const footerLinks = {
 
 export function SiteFooter() {
   return (
-    <footer className="bg-muted/30 border-t">
+    <footer className="bg-secondary/50 border-t">
       <div className="container mx-auto px-4 py-12">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           {/* Brand Section */}
           <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <Brain className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">AlignSynch</span>
+            <Link href="/" className="block mb-4">
+              <Image src="/logo.png" alt="AlignSynch Logo" width={160} height={25} />
             </Link>
             <p className="text-muted-foreground text-sm mb-4">
               Deepen your connection and grow together. Your journey to better alignment starts here.
