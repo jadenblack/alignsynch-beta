@@ -15,29 +15,7 @@ module.exports = {
       screens: { "2xl": "1400px" },
     },
     extend: {
-      /* -------------------------------------------------------------------- */
-      /*  Brand & Emotional Palette                                           */
-      /* -------------------------------------------------------------------- */
       colors: {
-        /* Soft gradient helpers */
-        "primary-soft": "hsl(var(--primary-soft))",
-        "accent-soft": "hsl(var(--accent-soft))",
-
-        /* Emotional hues */
-        warmth: "hsl(var(--warmth))",
-        "warmth-foreground": "hsl(var(--warmth-foreground))",
-        connection: "hsl(var(--connection))",
-        "connection-foreground": "hsl(var(--connection-foreground))",
-        growth: "hsl(var(--growth))",
-        "growth-foreground": "hsl(var(--growth-foreground))",
-        celebration: "hsl(var(--celebration))",
-        "celebration-foreground": "hsl(var(--celebration-foreground))",
-        collaboration: "hsl(var(--collaboration))",
-        "collaboration-foreground": "hsl(var(--collaboration-foreground))",
-        empathy: "hsl(var(--empathy))",
-        "empathy-foreground": "hsl(var(--empathy-foreground))",
-
-        /* Base palette from earlier config */
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -72,10 +50,6 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-
-      /* -------------------------------------------------------------------- */
-      /*  Misc.                                                               */
-      /* -------------------------------------------------------------------- */
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -83,12 +57,12 @@ module.exports = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: 0 },
+          from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: 0 },
+          to: { height: "0" },
         },
       },
       animation: {
