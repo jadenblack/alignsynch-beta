@@ -3,69 +3,17 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Brain, User, BarChart3, Trophy, Calendar, ArrowUpRight } from "lucide-react"
-
-// Mock user data
-const userData = {
-  name: "Alex Johnson",
-  email: "alex@example.com",
-  joinDate: "Jan 2023",
-  totalScore: 9850,
-  quizzesTaken: 42,
-  averageScore: 85,
-  badges: ["Science Expert", "History Buff", "Quiz Master", "Perfect Score", "Speed Demon"],
-  recentQuizzes: [
-    { id: "1", category: "Science", score: 9, total: 10, date: "2023-03-01" },
-    { id: "2", category: "History", score: 8, total: 10, date: "2023-02-28" },
-    { id: "3", category: "Technology", score: 10, total: 10, date: "2023-02-25" },
-    { id: "4", category: "Geography", score: 7, total: 10, date: "2023-02-20" },
-  ],
-  categoryPerformance: [
-    { category: "Science", score: 92 },
-    { category: "History", score: 88 },
-    { category: "Technology", score: 95 },
-    { category: "Geography", score: 78 },
-    { category: "Entertainment", score: 82 },
-  ],
-}
+import { User, BarChart3, Calendar, ArrowUpRight, Heart } from "lucide-react"
+import { mockUserAccount } from "@/lib/relationship-data"
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("overview")
+  const userData = mockUserAccount
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Link href="/">
-              <div className="flex items-center gap-2">
-                <Brain className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl font-bold">AlignSynch</h1>
-              </div>
-            </Link>
-          </div>
-          <nav className="hidden md:flex gap-6">
-            <Link href="/" className="font-medium hover:text-primary">
-              Home
-            </Link>
-            <Link href="/categories" className="font-medium hover:text-primary">
-              Categories
-            </Link>
-            <Link href="/leaderboard" className="font-medium hover:text-primary">
-              Leaderboard
-            </Link>
-            <Link href="/profile" className="font-medium text-primary">
-              Profile
-            </Link>
-          </nav>
-          <div className="flex gap-2">
-            <Button variant="outline">Logout</Button>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-1 py-12 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
@@ -83,12 +31,12 @@ export default function ProfilePage() {
                     Joined {userData.joinDate}
                   </Badge>
                   <Badge variant="outline" className="gap-1">
-                    <Trophy className="h-3 w-3" />
-                    {userData.totalScore.toLocaleString()} points
+                    <Heart className="h-3 w-3" />
+                    {userData.averageAlignment}% avg. alignment
                   </Badge>
                   <Badge variant="outline" className="gap-1">
                     <BarChart3 className="h-3 w-3" />
-                    {userData.quizzesTaken} quizzes
+                    {userData.sessionsCompleted} sessions
                   </Badge>
                 </div>
               </div>
@@ -96,8 +44,8 @@ export default function ProfilePage() {
                 <Link href="/settings">
                   <Button variant="outline">Settings</Button>
                 </Link>
-                <Link href="/quiz/new">
-                  <Button>Start New Quiz</Button>
+                <Link href="/session/new">
+                  <Button>Start New Session</Button>
                 </Link>
               </div>
             </div>
@@ -118,7 +66,7 @@ export default function ProfilePage() {
                 }`}
                 onClick={() => setActiveTab("history")}
               >
-                Quiz History
+                Session History
               </button>
               <button
                 className={`px-4 py-2 font-medium ${
@@ -137,34 +85,18 @@ export default function ProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Total Score</CardTitle>
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Avg. Alignment</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">{userData.totalScore.toLocaleString()}</div>
+                      <div className="text-3xl font-bold">{userData.averageAlignment}%</div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Quizzes Taken</CardTitle>
+                      <CardTitle className="text-sm font-medium text-muted-foreground">Sessions Done</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-3xl font-bold">{userData.quizzesTaken}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Average Score</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold">{userData.averageScore}%</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-sm font-medium text-muted-foreground">Global Rank</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-3xl font-bold">#42</div>
+                      <div className="text-3xl font-bold">{userData.sessionsCompleted}</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -172,8 +104,8 @@ export default function ProfilePage() {
                 {/* Category Performance */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Category Performance</CardTitle>
-                    <CardDescription>Your average scores by category</CardDescription>
+                    <CardTitle>Focus Area Performance</CardTitle>
+                    <CardDescription>Your average alignment scores by area</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -195,11 +127,11 @@ export default function ProfilePage() {
                   </CardContent>
                 </Card>
 
-                {/* Recent Quizzes */}
+                {/* Recent Sessions */}
                 <Card className="md:col-span-2">
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                      <CardTitle>Recent Quizzes</CardTitle>
+                      <CardTitle>Recent Sessions</CardTitle>
                       <Link href="/profile/history">
                         <Button variant="ghost" size="sm" className="gap-1">
                           View All
@@ -210,12 +142,12 @@ export default function ProfilePage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {userData.recentQuizzes.map((quiz) => (
-                        <div key={quiz.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      {userData.recentSessions.map((session) => (
+                        <div key={session.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                           <div>
-                            <p className="font-medium">{quiz.category}</p>
+                            <p className="font-medium">{session.category}</p>
                             <p className="text-sm text-muted-foreground">
-                              {new Date(quiz.date).toLocaleDateString("en-US", {
+                              {new Date(session.date).toLocaleDateString("en-US", {
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric",
@@ -223,12 +155,8 @@ export default function ProfilePage() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-bold">
-                              {quiz.score}/{quiz.total}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {Math.round((quiz.score / quiz.total) * 100)}%
-                            </p>
+                            <p className="font-bold">{session.score}%</p>
+                            <p className="text-sm text-muted-foreground">Alignment</p>
                           </div>
                         </div>
                       ))}
@@ -240,7 +168,7 @@ export default function ProfilePage() {
                 <Card className="md:col-span-2">
                   <CardHeader>
                     <CardTitle>Achievements</CardTitle>
-                    <CardDescription>Badges you've earned through quizzing</CardDescription>
+                    <CardDescription>Badges you've earned on your journey</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2">
@@ -254,113 +182,9 @@ export default function ProfilePage() {
                 </Card>
               </div>
             )}
-
-            {activeTab === "history" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quiz History</CardTitle>
-                  <CardDescription>All quizzes you've taken</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[...userData.recentQuizzes, ...userData.recentQuizzes].map((quiz, index) => (
-                      <div
-                        key={`${quiz.id}-${index}`}
-                        className="flex items-center justify-between p-4 bg-muted/50 rounded-lg"
-                      >
-                        <div>
-                          <p className="font-medium">{quiz.category}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(quiz.date).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="text-right">
-                            <p className="font-bold">
-                              {quiz.score}/{quiz.total}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {Math.round((quiz.score / quiz.total) * 100)}%
-                            </p>
-                          </div>
-                          <Link href={`/quiz/results/${quiz.id}`}>
-                            <Button variant="outline" size="sm">
-                              View Details
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-                <CardFooter className="flex justify-center">
-                  <Button variant="outline">Load More</Button>
-                </CardFooter>
-              </Card>
-            )}
-
-            {activeTab === "achievements" && (
-              <div className="grid md:grid-cols-2 gap-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Earned Badges</CardTitle>
-                    <CardDescription>Achievements you've unlocked</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      {userData.badges.map((badge) => (
-                        <div key={badge} className="bg-muted/50 rounded-lg p-4 text-center">
-                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                            <Trophy className="h-6 w-6 text-primary" />
-                          </div>
-                          <p className="font-medium">{badge}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Earned on Feb 28, 2023</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Available Badges</CardTitle>
-                    <CardDescription>Achievements to unlock</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-2 gap-4">
-                      {["Geography Pro", "Music Maestro", "Entertainment Guru", "100 Quizzes"].map((badge) => (
-                        <div key={badge} className="bg-muted/50 rounded-lg p-4 text-center opacity-60">
-                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
-                            <Trophy className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                          <p className="font-medium">{badge}</p>
-                          <p className="text-xs text-muted-foreground mt-1">Not yet earned</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            )}
           </div>
         </div>
       </main>
-
-      <footer className="bg-muted/30 border-t py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Brain className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">AlignSynch</span>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()} AlignSynch. All rights reserved.
-          </p>
-        </div>
-      </footer>
     </div>
   )
 }

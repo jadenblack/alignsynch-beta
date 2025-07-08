@@ -1,216 +1,341 @@
 "use client"
 
 import { useState } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Brain, ArrowRight, Clock, BarChart3 } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+import { Zap, Clock, Target, Brain, Settings, Play, ArrowLeft, Info } from "lucide-react"
+
+const categories = [
+  { id: "javascript", name: "JavaScript", icon: "🟨" },
+  { id: "python", name: "Python", icon: "🐍" },
+  { id: "typescript", name: "TypeScript", icon: "📘" },
+  { id: "react", name: "React", icon: "⚛️" },
+  { id: "nodejs", name: "Node.js", icon: "🟢" },
+  { id: "java", name: "Java", icon: "☕" },
+  { id: "csharp", name: "C#", icon: "🔷" },
+  { id: "go", name: "Go", icon: "🐹" },
+  { id: "rust", name: "Rust", icon: "🦀" },
+  { id: "sql", name: "SQL", icon: "🗄️" },
+]
+
+const difficulties = [
+  { id: "beginner", name: "Beginner", description: "Basic concepts and syntax", color: "text-green-600" },
+  { id: "intermediate", name: "Intermediate", description: "Advanced features and patterns", color: "text-yellow-600" },
+  { id: "advanced", name: "Advanced", description: "Complex algorithms and optimization", color: "text-red-600" },
+  { id: "mixed", name: "Mixed", description: "Adaptive difficulty based on performance", color: "text-blue-600" },
+]
 
 export default function NewQuizPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const preselectedCategory = searchParams.get("category")
 
   const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || "")
-  const [selectedDifficulty, setSelectedDifficulty] = useState(preselectedCategory ? "medium" : "medium")
-  const [selectedQuestionCount, setSelectedQuestionCount] = useState(10)
-  const [selectedTimeLimit, setSelectedTimeLimit] = useState(60)
+  const [difficulty, setDifficulty] = useState("mixed")
+  const [questionCount, setQuestionCount] = useState([10])
+  const [timeLimit, setTimeLimit] = useState([30])
+  const [enableHints, setEnableHints] = useState(true)
+  const [enableExplanations, setEnableExplanations] = useState(true)
+  const [focusAreas, setFocusAreas] = useState<string[]>([])
 
-  const categories = [
-    { id: "javascript", name: "JavaScript", icon: "JS" },
-    { id: "python", name: "Python", icon: "PY" },
-    { id: "java", name: "Java", icon: "JV" },
-    { id: "csharp", name: "C#", icon: "C#" },
-    { id: "cpp", name: "C++", icon: "C++" },
-    { id: "ruby", name: "Ruby", icon: "RB" },
-    { id: "go", name: "Go", icon: "GO" },
-    { id: "typescript", name: "TypeScript", icon: "TS" },
-  ]
+  const selectedCategoryData = categories.find((cat) => cat.id === selectedCategory)
+  const selectedDifficultyData = difficulties.find((diff) => diff.id === difficulty)
 
-  const difficulties = [
-    { id: "easy", name: "Easy", description: "Basic language concepts and syntax" },
-    { id: "medium", name: "Medium", description: "Intermediate programming challenges" },
-    { id: "hard", name: "Hard", description: "Advanced concepts and problem-solving" },
-    { id: "adaptive", name: "Adaptive", description: "Adjusts difficulty based on your performance" },
-  ]
-
-  const questionCounts = [5, 10, 15, 20]
-  const timeLimits = [30, 60, 90, 120, 0] // 0 means no time limit
-
-  const startQuiz = () => {
-    if (!selectedCategory) {
-      // Add validation feedback
-      alert("Please select a programming language before starting the quiz")
-      return
-    }
-
-    // Add console logging for debugging
-    console.log("Starting quiz with:", {
-      category: selectedCategory,
-      difficulty: selectedDifficulty,
-      count: selectedQuestionCount,
-      time: selectedTimeLimit,
-    })
-
-    router.push(
-      `/quiz/play?category=${selectedCategory}&difficulty=${selectedDifficulty}&count=${selectedQuestionCount}&time=${selectedTimeLimit}`,
-    )
-  }
+  const canStartQuiz = selectedCategory && difficulty
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Link href="/">
-              <div className="flex items-center gap-2">
-                <Brain className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl font-bold">AlignSynch</h1>
-              </div>
-            </Link>
-          </div>
-          <nav className="hidden md:flex gap-6">
-            <Link href="/" className="font-medium hover:text-primary">
-              Home
-            </Link>
-            <Link href="/categories" className="font-medium hover:text-primary">
-              Categories
-            </Link>
-            <Link href="/leaderboard" className="font-medium hover:text-primary">
-              Leaderboard
-            </Link>
-            <Link href="/profile" className="font-medium hover:text-primary">
-              Profile
-            </Link>
-          </nav>
-          <div className="flex gap-2">
-            <Link href="/login">
-              <Button variant="outline">Login</Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Sign Up</Button>
-            </Link>
-          </div>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <Link href="/categories">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold">Create New Quiz</h1>
+          <p className="text-muted-foreground">Customize your AI-generated coding quiz experience</p>
         </div>
-      </header>
+      </div>
 
-      <main className="flex-1 py-12 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8 text-center">Create Your Quiz</h1>
-
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Select Category</CardTitle>
-                <CardDescription>Choose a category for your quiz questions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Configuration Panel */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Category Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Programming Language
+              </CardTitle>
+              <CardDescription>Choose the programming language or technology for your quiz</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a programming language" />
+                </SelectTrigger>
+                <SelectContent>
                   {categories.map((category) => (
-                    <Button
-                      key={category.id}
-                      variant={selectedCategory === category.id ? "default" : "outline"}
-                      className="h-auto py-4 flex flex-col gap-2"
-                      onClick={() => setSelectedCategory(category.id)}
-                    >
-                      <span className="text-2xl">{category.icon}</span>
-                      <span>{category.name}</span>
-                    </Button>
+                    <SelectItem key={category.id} value={category.id}>
+                      <div className="flex items-center gap-2">
+                        <span>{category.icon}</span>
+                        <span>{category.name}</span>
+                      </div>
+                    </SelectItem>
                   ))}
-                </div>
-              </CardContent>
-            </Card>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
 
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Select Difficulty</CardTitle>
-                <CardDescription>Choose how challenging you want your quiz to be</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {difficulties.map((difficulty) => (
-                    <Button
-                      key={difficulty.id}
-                      variant={selectedDifficulty === difficulty.id ? "default" : "outline"}
-                      className="h-auto py-4 flex flex-col gap-2 justify-start items-start text-left"
-                      onClick={() => setSelectedDifficulty(difficulty.id)}
-                    >
-                      <span className="font-bold">{difficulty.name}</span>
-                      <span className="text-xs font-normal">{difficulty.description}</span>
-                    </Button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Number of Questions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {questionCounts.map((count) => (
-                      <Button
-                        key={count}
-                        variant={selectedQuestionCount === count ? "default" : "outline"}
-                        onClick={() => setSelectedQuestionCount(count)}
-                      >
-                        {count}
-                      </Button>
-                    ))}
+          {/* Difficulty Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Difficulty Level
+              </CardTitle>
+              <CardDescription>Set the complexity level for your quiz questions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {difficulties.map((diff) => (
+                  <div
+                    key={diff.id}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      difficulty === diff.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => setDifficulty(diff.id)}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className={`font-semibold ${diff.color}`}>{diff.name}</h3>
+                      {difficulty === diff.id && <div className="w-2 h-2 rounded-full bg-primary"></div>}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{diff.description}</p>
                   </div>
-                </CardContent>
-              </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Time Limit (seconds)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {timeLimits.map((time) => (
-                      <Button
-                        key={time}
-                        variant={selectedTimeLimit === time ? "default" : "outline"}
-                        onClick={() => setSelectedTimeLimit(time)}
-                      >
-                        {time === 0 ? "No Limit" : time}
-                      </Button>
-                    ))}
+          {/* Quiz Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Quiz Settings
+              </CardTitle>
+              <CardDescription>Customize the quiz format and assistance options</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Question Count */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="question-count">Number of Questions</Label>
+                  <Badge variant="outline">{questionCount[0]} questions</Badge>
+                </div>
+                <Slider
+                  id="question-count"
+                  min={5}
+                  max={50}
+                  step={5}
+                  value={questionCount}
+                  onValueChange={setQuestionCount}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>5 min</span>
+                  <span>50 max</span>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Time Limit */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="time-limit">Time per Question (seconds)</Label>
+                  <Badge variant="outline" className="gap-1">
+                    <Clock className="h-3 w-3" />
+                    {timeLimit[0]}s
+                  </Badge>
+                </div>
+                <Slider
+                  id="time-limit"
+                  min={15}
+                  max={120}
+                  step={15}
+                  value={timeLimit}
+                  onValueChange={setTimeLimit}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>15s</span>
+                  <span>2min</span>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Assistance Options */}
+              <div className="space-y-4">
+                <h4 className="font-medium">Assistance Options</h4>
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="hints">Enable Hints</Label>
+                    <p className="text-xs text-muted-foreground">Get helpful hints when you're stuck</p>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <Switch id="hints" checked={enableHints} onCheckedChange={setEnableHints} />
+                </div>
 
-            <div className="flex justify-center">
-              <Button size="lg" className="gap-2" onClick={startQuiz} disabled={!selectedCategory}>
-                Start Quiz
-                <ArrowRight className="h-5 w-5" />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="explanations">Detailed Explanations</Label>
+                    <p className="text-xs text-muted-foreground">See explanations after each question</p>
+                  </div>
+                  <Switch id="explanations" checked={enableExplanations} onCheckedChange={setEnableExplanations} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Summary Panel */}
+        <div className="space-y-6">
+          {/* Quiz Preview */}
+          <Card className="sticky top-4">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                Quiz Preview
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {selectedCategoryData && (
+                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
+                  <div className="text-2xl">{selectedCategoryData.icon}</div>
+                  <div>
+                    <h3 className="font-semibold">{selectedCategoryData.name}</h3>
+                    <p className="text-sm text-muted-foreground">Programming Language</p>
+                  </div>
+                </div>
+              )}
+
+              {selectedDifficultyData && (
+                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div>
+                    <h4 className="font-medium">Difficulty</h4>
+                    <p className={`text-sm ${selectedDifficultyData.color}`}>{selectedDifficultyData.name}</p>
+                  </div>
+                </div>
+              )}
+
+              <Separator />
+
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Questions:</span>
+                  <span className="font-medium">{questionCount[0]}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Time per question:</span>
+                  <span className="font-medium">{timeLimit[0]}s</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Estimated time:</span>
+                  <span className="font-medium">{Math.ceil((questionCount[0] * timeLimit[0]) / 60)} min</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Hints:</span>
+                  <span className="font-medium">{enableHints ? "Enabled" : "Disabled"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Explanations:</span>
+                  <span className="font-medium">{enableExplanations ? "Enabled" : "Disabled"}</span>
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-3">
+                <Link href={canStartQuiz ? "/quiz/play" : "#"}>
+                  <Button className="w-full gap-2" disabled={!canStartQuiz} size="lg">
+                    <Play className="h-4 w-4" />
+                    Start Quiz
+                  </Button>
+                </Link>
+
+                {!canStartQuiz && (
+                  <div className="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <Info className="h-4 w-4 text-yellow-600 mt-0.5 shrink-0" />
+                    <p className="text-sm text-yellow-800">
+                      Please select a programming language and difficulty level to start your quiz.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Start Options */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick Start</CardTitle>
+              <CardDescription>Popular quiz configurations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 bg-transparent"
+                onClick={() => {
+                  setSelectedCategory("javascript")
+                  setDifficulty("beginner")
+                  setQuestionCount([10])
+                  setTimeLimit([30])
+                }}
+              >
+                <span>🟨</span>
+                JavaScript Basics
               </Button>
-            </div>
-          </div>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 bg-transparent"
+                onClick={() => {
+                  setSelectedCategory("python")
+                  setDifficulty("intermediate")
+                  setQuestionCount([15])
+                  setTimeLimit([45])
+                }}
+              >
+                <span>🐍</span>
+                Python Challenge
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2 bg-transparent"
+                onClick={() => {
+                  setSelectedCategory("react")
+                  setDifficulty("advanced")
+                  setQuestionCount([20])
+                  setTimeLimit([60])
+                }}
+              >
+                <span>⚛️</span>
+                React Expert
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-
-      <footer className="bg-muted/30 border-t py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Brain className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">AlignSynch</span>
-          </div>
-          <p className="text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()} AlignSynch. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      </div>
     </div>
   )
 }
