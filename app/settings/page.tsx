@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -9,14 +9,16 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { User, Palette, Bell, Shield, Save, Heart } from "lucide-react"
+import { User, Palette, Bell, Shield, Save, Heart, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { saveUserSettings, getUserSettings, type UserSettings } from "@/app/actions/settings"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function SettingsPage() {
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<UserSettings>({
     // Profile settings
-    displayName: "Alex Johnson",
-    email: "alex@example.com",
-    bio: "Building stronger connections, one conversation at a time.",
+    displayName: "",
+    email: "",
+    bio: "",
 
     // Notification settings
     emailNotifications: true,
@@ -36,15 +38,69 @@ export default function SettingsPage() {
     autoContinue: false,
   })
 
-  const handleSettingChange = (key: string, value: any) => {
+  const [isPending, startTransition] = useTransition()
+  const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; message: string } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load user settings on component mount
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const result = await getUserSettings()
+        if (result.success && result.data) {
+          setSettings(result.data)
+        }
+      } catch (error) {
+        console.error("Failed to load settings:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadSettings()
+  }, [])
+
+  const handleSettingChange = (key: keyof UserSettings, value: any) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
+    // Clear any previous save messages when user makes changes
+    setSaveMessage(null)
   }
 
-  const saveSettings = () => {
-    // In a real app, this would save to a backend
-    console.log("Saving settings:", settings)
-    // Show success message
-    alert("Settings saved successfully!")
+  const handleSaveSettings = () => {
+    startTransition(async () => {
+      try {
+        const result = await saveUserSettings(settings)
+        setSaveMessage({
+          type: result.success ? "success" : "error",
+          message: result.message,
+        })
+
+        // Clear message after 5 seconds
+        setTimeout(() => {
+          setSaveMessage(null)
+        }, 5000)
+      } catch (error) {
+        setSaveMessage({
+          type: "error",
+          message: "An unexpected error occurred. Please try again.",
+        })
+      }
+    })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 py-12 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-lg">Loading settings...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -60,6 +116,21 @@ export default function SettingsPage() {
               <p className="text-muted-foreground">Manage your account settings and preferences</p>
             </div>
           </div>
+
+          {saveMessage && (
+            <Alert
+              className={`mb-6 ${saveMessage.type === "success" ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}
+            >
+              {saveMessage.type === "success" ? (
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-red-600" />
+              )}
+              <AlertDescription className={saveMessage.type === "success" ? "text-green-800" : "text-red-800"}>
+                {saveMessage.message}
+              </AlertDescription>
+            </Alert>
+          )}
 
           <Tabs defaultValue="profile" className="space-y-6">
             <TabsList className="grid w-full grid-cols-5">
@@ -94,20 +165,24 @@ export default function SettingsPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="displayName">Display Name</Label>
+                      <Label htmlFor="displayName">Display Name *</Label>
                       <Input
                         id="displayName"
                         value={settings.displayName}
                         onChange={(e) => handleSettingChange("displayName", e.target.value)}
+                        placeholder="Enter your display name"
+                        required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">Email *</Label>
                       <Input
                         id="email"
                         type="email"
                         value={settings.email}
                         onChange={(e) => handleSettingChange("email", e.target.value)}
+                        placeholder="Enter your email address"
+                        required
                       />
                     </div>
                   </div>
@@ -128,10 +203,16 @@ export default function SettingsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Appearance Settings</CardTitle>
-                  <CardDescription>Customize the look and feel of AlignSynch.</CardDescription>
+                  <CardDescription>Customize the look and feel of AlignSynch</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Theme customization options are coming soon!</p>
+                  <div className="text-center py-8">
+                    <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">Theme customization options are coming soon!</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      We're working on bringing you more ways to personalize your AlignSynch experience.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -314,9 +395,18 @@ export default function SettingsPage() {
           </Tabs>
 
           <div className="flex justify-end pt-6">
-            <Button onClick={saveSettings} className="highlight-button gap-2">
-              <Save className="h-4 w-4" />
-              Save Settings
+            <Button onClick={handleSaveSettings} disabled={isPending} className="highlight-button gap-2">
+              {isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save Settings
+                </>
+              )}
             </Button>
           </div>
         </div>
