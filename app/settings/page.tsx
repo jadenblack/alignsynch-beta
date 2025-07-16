@@ -2,16 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, User, Heart, Bell, Shield, Save } from "lucide-react"
+import { Loader2, User, Bell, Shield, Heart } from "lucide-react"
 import { saveUserSettings, getUserSettings, type UserSettings } from "@/app/actions/settings"
 
 export default function SettingsPage() {
@@ -23,14 +22,11 @@ export default function SettingsPage() {
   // Load settings on component mount
   useEffect(() => {
     async function loadSettings() {
-      try {
-        const userSettings = await getUserSettings()
-        setSettings(userSettings)
-      } catch (error) {
-        setMessage({ type: "error", text: "Failed to load settings" })
-      } finally {
-        setLoading(false)
+      const result = await getUserSettings()
+      if (result.success && result.data) {
+        setSettings(result.data)
       }
+      setLoading(false)
     }
     loadSettings()
   }, [])
@@ -45,48 +41,39 @@ export default function SettingsPage() {
 
   const handleSubmit = async (formData: FormData) => {
     setSaving(true)
-    try {
-      const result = await saveUserSettings(formData)
-      setMessage({
-        type: result.success ? "success" : "error",
-        text: result.message,
-      })
+    const result = await saveUserSettings(formData)
 
-      if (result.success && settings) {
-        // Update local state with new values
-        const updatedSettings = {
-          ...settings,
-          displayName: formData.get("displayName") as string,
-          email: formData.get("email") as string,
-          bio: formData.get("bio") as string,
-          defaultDifficulty: formData.get("defaultDifficulty") as "easy" | "medium" | "hard",
-          defaultQuestionCount: Number.parseInt(formData.get("defaultQuestionCount") as string),
-          defaultTimeLimit: Number.parseInt(formData.get("defaultTimeLimit") as string),
-          autoSubmitAnswers: formData.get("autoSubmitAnswers") === "on",
-          emailNotifications: formData.get("emailNotifications") === "on",
-          pushNotifications: formData.get("pushNotifications") === "on",
-          weeklyDigest: formData.get("weeklyDigest") === "on",
-          profileVisibility: formData.get("profileVisibility") as "public" | "friends" | "private",
-          shareProgress: formData.get("shareProgress") === "on",
-          allowDataCollection: formData.get("allowDataCollection") === "on",
-        }
-        setSettings(updatedSettings)
+    if (result.success) {
+      setMessage({ type: "success", text: result.message })
+      if (result.data) {
+        setSettings(result.data)
       }
-    } catch (error) {
-      setMessage({ type: "error", text: "An unexpected error occurred" })
-    } finally {
-      setSaving(false)
+    } else {
+      setMessage({ type: "error", text: result.message })
     }
+    setSaving(false)
+  }
+
+  const handleInputChange = (field: string, value: any) => {
+    if (!settings) return
+
+    const fieldPath = field.split(".")
+    const newSettings = { ...settings }
+
+    if (fieldPath.length === 1) {
+      ;(newSettings as any)[fieldPath[0]] = value
+    } else if (fieldPath.length === 2) {
+      ;(newSettings as any)[fieldPath[0]][fieldPath[1]] = value
+    }
+
+    setSettings(newSettings)
   }
 
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <span className="text-lg">Loading settings...</span>
-          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </div>
     )
@@ -105,15 +92,15 @@ export default function SettingsPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Settings</h1>
+        <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
         <p className="text-muted-foreground">Manage your account settings and preferences</p>
       </div>
 
       {message && (
         <Alert
-          className={`mb-6 ${message.type === "success" ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}
+          className={`mb-6 ${message.type === "success" ? "border-primary bg-primary/5" : "border-destructive bg-destructive/5"}`}
         >
-          <AlertDescription className={message.type === "success" ? "text-green-800" : "text-red-800"}>
+          <AlertDescription className={message.type === "success" ? "text-primary" : "text-destructive"}>
             {message.text}
           </AlertDescription>
         </Alert>
@@ -126,9 +113,9 @@ export default function SettingsPage() {
               <User className="h-4 w-4" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="relationship" className="flex items-center gap-2">
+            <TabsTrigger value="relationships" className="flex items-center gap-2">
               <Heart className="h-4 w-4" />
-              Relationship
+              Relationships
             </TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
@@ -144,71 +131,73 @@ export default function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Update your personal information and profile details</CardDescription>
+                <CardDescription>Update your personal information and account details</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name *</Label>
-                  <Input
-                    id="displayName"
-                    name="displayName"
-                    defaultValue={settings.displayName}
-                    placeholder="Enter your display name"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    defaultValue={settings.email}
-                    placeholder="Enter your email address"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="bio">Bio</Label>
-                  <Textarea
-                    id="bio"
-                    name="bio"
-                    defaultValue={settings.bio}
-                    placeholder="Tell us about yourself and your relationship goals..."
-                    rows={4}
-                  />
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={settings.name}
+                      onChange={(e) => handleInputChange("name", e.target.value)}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={settings.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
+                      placeholder="Enter your email address"
+                      required
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="relationship">
+          <TabsContent value="relationships">
             <Card>
               <CardHeader>
                 <CardTitle>Relationship Preferences</CardTitle>
-                <CardDescription>Set your default relationship session settings and preferences</CardDescription>
+                <CardDescription>Set your default relationship assessment settings and preferences</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="defaultDifficulty">Default Difficulty</Label>
-                    <Select name="defaultDifficulty" defaultValue={settings.defaultDifficulty}>
+                    <Select
+                      name="defaultDifficulty"
+                      value={settings.relationshipPreferences.defaultDifficulty}
+                      onValueChange={(value) => handleInputChange("relationshipPreferences.defaultDifficulty", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="easy">Easy</SelectItem>
-                        <SelectItem value="medium">Medium</SelectItem>
-                        <SelectItem value="hard">Hard</SelectItem>
+                        <SelectItem value="Easy">Easy</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Hard">Hard</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="defaultQuestionCount">Default Question Count</Label>
-                    <Select name="defaultQuestionCount" defaultValue={settings.defaultQuestionCount.toString()}>
+                    <Select
+                      name="defaultQuestionCount"
+                      value={settings.relationshipPreferences.defaultQuestionCount.toString()}
+                      onValueChange={(value) =>
+                        handleInputChange("relationshipPreferences.defaultQuestionCount", Number.parseInt(value))
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -223,7 +212,13 @@ export default function SettingsPage() {
 
                   <div className="space-y-2">
                     <Label htmlFor="defaultTimeLimit">Default Time Limit</Label>
-                    <Select name="defaultTimeLimit" defaultValue={settings.defaultTimeLimit.toString()}>
+                    <Select
+                      name="defaultTimeLimit"
+                      value={settings.relationshipPreferences.defaultTimeLimit.toString()}
+                      onValueChange={(value) =>
+                        handleInputChange("relationshipPreferences.defaultTimeLimit", Number.parseInt(value))
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -244,7 +239,14 @@ export default function SettingsPage() {
                     <Label htmlFor="autoSubmitAnswers">Auto-submit Answers</Label>
                     <p className="text-sm text-muted-foreground">Automatically submit when time runs out</p>
                   </div>
-                  <Switch id="autoSubmitAnswers" name="autoSubmitAnswers" defaultChecked={settings.autoSubmitAnswers} />
+                  <Switch
+                    id="autoSubmitAnswers"
+                    name="autoSubmitAnswers"
+                    checked={settings.relationshipPreferences.autoSubmitAnswers}
+                    onCheckedChange={(checked) =>
+                      handleInputChange("relationshipPreferences.autoSubmitAnswers", checked)
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -253,21 +255,20 @@ export default function SettingsPage() {
           <TabsContent value="notifications">
             <Card>
               <CardHeader>
-                <CardTitle>Notification Settings</CardTitle>
+                <CardTitle>Notification Preferences</CardTitle>
                 <CardDescription>Choose how you want to be notified about updates and activities</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="emailNotifications">Email Notifications</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Receive email updates about your relationship progress
-                    </p>
+                    <p className="text-sm text-muted-foreground">Receive notifications via email</p>
                   </div>
                   <Switch
                     id="emailNotifications"
                     name="emailNotifications"
-                    defaultChecked={settings.emailNotifications}
+                    checked={settings.notifications.email}
+                    onCheckedChange={(checked) => handleInputChange("notifications.email", checked)}
                   />
                 </div>
 
@@ -276,21 +277,31 @@ export default function SettingsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="pushNotifications">Push Notifications</Label>
-                    <p className="text-sm text-muted-foreground">Get push notifications for session reminders</p>
+                    <p className="text-sm text-muted-foreground">Receive push notifications in your browser</p>
                   </div>
-                  <Switch id="pushNotifications" name="pushNotifications" defaultChecked={settings.pushNotifications} />
+                  <Switch
+                    id="pushNotifications"
+                    name="pushNotifications"
+                    checked={settings.notifications.push}
+                    onCheckedChange={(checked) => handleInputChange("notifications.push", checked)}
+                  />
                 </div>
 
                 <Separator />
 
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="weeklyDigest">Weekly Digest</Label>
+                    <Label htmlFor="weeklyNotifications">Weekly Summary</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receive a weekly summary of your relationship insights
+                      Receive a weekly summary of your relationship progress
                     </p>
                   </div>
-                  <Switch id="weeklyDigest" name="weeklyDigest" defaultChecked={settings.weeklyDigest} />
+                  <Switch
+                    id="weeklyNotifications"
+                    name="weeklyNotifications"
+                    checked={settings.notifications.weekly}
+                    onCheckedChange={(checked) => handleInputChange("notifications.weekly", checked)}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -303,18 +314,17 @@ export default function SettingsPage() {
                 <CardDescription>Control your privacy and data sharing preferences</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="profileVisibility">Profile Visibility</Label>
-                  <Select name="profileVisibility" defaultValue={settings.profileVisibility}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="public">Public - Anyone can see your profile</SelectItem>
-                      <SelectItem value="friends">Friends - Only friends can see your profile</SelectItem>
-                      <SelectItem value="private">Private - Only you can see your profile</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="profileVisible">Public Profile</Label>
+                    <p className="text-sm text-muted-foreground">Make your profile visible to other users</p>
+                  </div>
+                  <Switch
+                    id="profileVisible"
+                    name="profileVisible"
+                    checked={settings.privacy.profileVisible}
+                    onCheckedChange={(checked) => handleInputChange("privacy.profileVisible", checked)}
+                  />
                 </div>
 
                 <Separator />
@@ -326,22 +336,11 @@ export default function SettingsPage() {
                       Allow others to see your relationship progress and achievements
                     </p>
                   </div>
-                  <Switch id="shareProgress" name="shareProgress" defaultChecked={settings.shareProgress} />
-                </div>
-
-                <Separator />
-
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor="allowDataCollection">Allow Data Collection</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Help improve AlignSynch by sharing anonymous usage data
-                    </p>
-                  </div>
                   <Switch
-                    id="allowDataCollection"
-                    name="allowDataCollection"
-                    defaultChecked={settings.allowDataCollection}
+                    id="shareProgress"
+                    name="shareProgress"
+                    checked={settings.privacy.shareProgress}
+                    onCheckedChange={(checked) => handleInputChange("privacy.shareProgress", checked)}
                   />
                 </div>
               </CardContent>
@@ -350,17 +349,14 @@ export default function SettingsPage() {
         </Tabs>
 
         <div className="flex justify-end pt-6">
-          <Button type="submit" disabled={saving} className="gap-2">
+          <Button type="submit" disabled={saving} className="min-w-[120px]">
             {saving ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : (
-              <>
-                <Save className="h-4 w-4" />
-                Save Settings
-              </>
+              "Save Settings"
             )}
           </Button>
         </div>

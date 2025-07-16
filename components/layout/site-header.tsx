@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Map } from "lucide-react"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -23,10 +23,19 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <Image src="/logo.png" alt="AlignSynch Logo" width={160} height={25} priority />
-        </Link>
+        {/* Logo and Sitemap */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Image src="/logo.png" alt="AlignSynch Logo" width={160} height={25} priority />
+          </Link>
+          <Link
+            href="/sitemap"
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            title="Site Map"
+          >
+            <Map className="h-5 w-5" />
+          </Link>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex gap-6">
