@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 
 const navigationLinks = [
   { href: "/", label: "Home" },
+  { href: "/home-1", label: "Home.1" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/focus-areas", label: "Focus Areas" },
   { href: "/our-journey", label: "Our Journey" },

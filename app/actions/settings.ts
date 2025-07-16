@@ -1,47 +1,38 @@
 "use server"
 
-import { revalidatePath } from "next/cache"
+import { z } from "zod"
 
-export interface UserSettings {
-  id?: string
-  name: string
-  email: string
-  relationshipPreferences: {
-    defaultDifficulty: string
-    defaultQuestionCount: number
-    defaultTimeLimit: number
-    autoSubmitAnswers: boolean
-  }
-  notifications: {
-    email: boolean
-    push: boolean
-    weekly: boolean
-  }
-  privacy: {
-    profileVisible: boolean
-    shareProgress: boolean
-  }
-}
+// Define the settings schema for validation
+const settingsSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format"),
+  notifications: z.boolean(),
+  theme: z.enum(["light", "dark", "system"]),
+  language: z.string(),
+  timezone: z.string(),
+  relationshipPreferences: z.object({
+    defaultDifficulty: z.string(),
+    defaultQuestionCount: z.string(),
+    defaultTimeLimit: z.string(),
+    autoSubmitAnswers: z.boolean(),
+  }),
+})
 
-// Simulate database storage (replace with real database calls)
+export type UserSettings = z.infer<typeof settingsSchema>
+
+// Simulate database storage (replace with actual database calls)
 let userSettingsStore: UserSettings = {
-  id: "1",
   name: "",
   email: "",
+  notifications: true,
+  theme: "light",
+  language: "en",
+  timezone: "UTC",
   relationshipPreferences: {
-    defaultDifficulty: "Medium",
-    defaultQuestionCount: 10,
-    defaultTimeLimit: 60,
+    defaultDifficulty: "medium",
+    defaultQuestionCount: "10",
+    defaultTimeLimit: "60",
     autoSubmitAnswers: false,
-  },
-  notifications: {
-    email: true,
-    push: false,
-    weekly: true,
-  },
-  privacy: {
-    profileVisible: true,
-    shareProgress: false,
   },
 }
 
@@ -50,64 +41,41 @@ export async function saveUserSettings(formData: FormData) {
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
   try {
-    const name = formData.get("name") as string
-    const email = formData.get("email") as string
-    const defaultDifficulty = formData.get("defaultDifficulty") as string
-    const defaultQuestionCount = Number.parseInt(formData.get("defaultQuestionCount") as string)
-    const defaultTimeLimit = Number.parseInt(formData.get("defaultTimeLimit") as string)
-    const autoSubmitAnswers = formData.get("autoSubmitAnswers") === "on"
-    const emailNotifications = formData.get("emailNotifications") === "on"
-    const pushNotifications = formData.get("pushNotifications") === "on"
-    const weeklyNotifications = formData.get("weeklyNotifications") === "on"
-    const profileVisible = formData.get("profileVisible") === "on"
-    const shareProgress = formData.get("shareProgress") === "on"
-
-    // Validation
-    if (!name || !email) {
-      return {
-        success: false,
-        message: "Name and email are required fields.",
-      }
-    }
-
-    if (!email.includes("@")) {
-      return {
-        success: false,
-        message: "Please enter a valid email address.",
-      }
-    }
-
-    // Update the store (replace with database update)
-    userSettingsStore = {
-      ...userSettingsStore,
-      name,
-      email,
+    const rawData = {
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      notifications: formData.get("notifications") === "on",
+      theme: formData.get("theme") as string,
+      language: formData.get("language") as string,
+      timezone: formData.get("timezone") as string,
       relationshipPreferences: {
-        defaultDifficulty,
-        defaultQuestionCount,
-        defaultTimeLimit,
-        autoSubmitAnswers,
-      },
-      notifications: {
-        email: emailNotifications,
-        push: pushNotifications,
-        weekly: weeklyNotifications,
-      },
-      privacy: {
-        profileVisible,
-        shareProgress,
+        defaultDifficulty: formData.get("defaultDifficulty") as string,
+        defaultQuestionCount: formData.get("defaultQuestionCount") as string,
+        defaultTimeLimit: formData.get("defaultTimeLimit") as string,
+        autoSubmitAnswers: formData.get("autoSubmitAnswers") === "on",
       },
     }
 
-    revalidatePath("/settings")
+    // Validate the data
+    const validatedData = settingsSchema.parse(rawData)
+
+    // Save to "database" (replace with actual database call)
+    userSettingsStore = validatedData
 
     return {
       success: true,
       message: "Settings saved successfully!",
-      data: userSettingsStore,
+      data: validatedData,
     }
   } catch (error) {
-    console.error("Error saving settings:", error)
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        message: "Validation failed",
+        errors: error.errors,
+      }
+    }
+
     return {
       success: false,
       message: "Failed to save settings. Please try again.",
@@ -115,22 +83,10 @@ export async function saveUserSettings(formData: FormData) {
   }
 }
 
-export async function getUserSettings() {
+export async function getUserSettings(): Promise<UserSettings> {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 500))
 
-  try {
-    // Return the stored settings (replace with database query)
-    return {
-      success: true,
-      data: userSettingsStore,
-    }
-  } catch (error) {
-    console.error("Error fetching settings:", error)
-    return {
-      success: false,
-      message: "Failed to load settings.",
-      data: null,
-    }
-  }
+  // Return from "database" (replace with actual database call)
+  return userSettingsStore
 }
