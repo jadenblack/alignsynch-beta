@@ -1,26 +1,32 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import {
-  Heart,
-  Users,
-  Target,
-  TrendingUp,
-  CheckCircle,
-  Star,
-  ArrowRight,
-  Play,
-  MessageCircle,
-  Shield,
-  Zap,
-} from "lucide-react"
+import { Heart, Users, Target, TrendingUp, CheckCircle, Star, MessageCircle, Shield, Zap } from "lucide-react"
 
-export default function HomePage() {
+export default function Home() {
   return (
-    <div className="min-h-screen">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center px-6">
+      <h1 className="text-4xl font-bold text-gray-800 mb-4">Welcome to AlignSynch</h1>
+
+      <p className="text-gray-600 max-w-xl mb-8">
+        AlignSynch brings clarity and connection to every relationship—personal or professional. Start an assessment or
+        explore our new demo page.
+      </p>
+
+      <div className="flex gap-4">
+        <Button asChild>
+          <Link href="/assessment">Start Assessment</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/home-1">Visit Home.1</Link>
+        </Button>
+      </div>
+
       {/* Hero Section */}
-      <section className="community-hero py-20 lg:py-32 relative">
+      <section className="community-hero py-20 lg:py-32 relative mt-24">
         <div className="container mx-auto px-4 text-center relative z-10">
           {/* Social Proof */}
           <div className="flex items-center justify-center gap-2 mb-6">
@@ -47,22 +53,6 @@ export default function HomePage() {
             Discover deeper connections, resolve conflicts faster, and build stronger relationships through personalized
             insights and guided conversations.
           </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link href="/signup">
-              <Button className="cta-primary">
-                Start Your Journey
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/demo">
-              <Button variant="outline" className="cta-secondary bg-transparent">
-                <Play className="mr-2 h-4 w-4" />
-                Watch Demo
-              </Button>
-            </Link>
-          </div>
 
           {/* Trust Indicators */}
           <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-muted-foreground">
@@ -226,29 +216,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Final CTA */}
-      <section className="py-20 text-center">
-        <div className="container mx-auto px-4">
-          <h2 className="text-title mb-4">Ready to transform your relationship?</h2>
-          <p className="text-body text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of couples who have already discovered the power of aligned relationships.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
-              <Button className="cta-primary">
-                Get Started Free
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/contact">
-              <Button variant="outline" className="cta-secondary bg-transparent">
-                Talk to an Expert
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-    </div>
+    </main>
   )
 }

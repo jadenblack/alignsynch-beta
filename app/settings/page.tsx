@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -11,28 +11,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, User, Palette, Bell, Shield, Heart } from "lucide-react"
-import { getUserSettings, saveUserSettings, type UserSettings } from "@/app/actions/settings"
+import { Loader2, User, Bell, Shield, Heart, CheckCircle, AlertCircle } from "lucide-react"
+import { saveUserSettings, getUserSettings, type UserSettings } from "@/app/actions/settings"
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<UserSettings | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isPending, startTransition] = useTransition()
+  const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
   // Load settings on component mount
   useEffect(() => {
     async function loadSettings() {
-      try {
-        const userSettings = await getUserSettings()
-        setSettings(userSettings)
-      } catch (error) {
-        setMessage({ type: "error", text: "Failed to load settings" })
-      } finally {
-        setLoading(false)
+      const response = await getUserSettings()
+      if (response.success && response.data) {
+        setSettings(response.data)
       }
+      setLoading(false)
     }
-
     loadSettings()
   }, [])
 
@@ -45,18 +41,19 @@ export default function SettingsPage() {
   }, [message])
 
   const handleSubmit = async (formData: FormData) => {
-    startTransition(async () => {
-      const result = await saveUserSettings(formData)
+    setSaving(true)
+    setMessage(null)
 
-      if (result.success) {
-        setMessage({ type: "success", text: result.message })
-        if (result.data) {
-          setSettings(result.data)
-        }
-      } else {
-        setMessage({ type: "error", text: result.message })
-      }
-    })
+    const response = await saveUserSettings(formData)
+
+    if (response.success && response.data) {
+      setSettings(response.data)
+      setMessage({ type: "success", text: response.message })
+    } else {
+      setMessage({ type: "error", text: response.message })
+    }
+
+    setSaving(false)
   }
 
   const updateSetting = (key: keyof UserSettings, value: any) => {
@@ -69,7 +66,10 @@ export default function SettingsPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <span className="text-muted-foreground">Loading settings...</span>
+          </div>
         </div>
       </div>
     )
@@ -79,243 +79,134 @@ export default function SettingsPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <Alert>
-          <AlertDescription>Failed to load settings. Please refresh the page.</AlertDescription>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Failed to load settings. Please refresh the page and try again.</AlertDescription>
         </Alert>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-muted-foreground mt-2">Manage your account settings and preferences</p>
-        </div>
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <User className="h-8 w-8 text-primary" />
+          Settings
+        </h1>
+        <p className="text-muted-foreground mt-2">Manage your account settings and preferences</p>
+      </div>
 
-        {message && (
-          <Alert
-            className={`mb-6 ${message.type === "success" ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}
-          >
-            <AlertDescription className={message.type === "success" ? "text-green-800" : "text-red-800"}>
-              {message.text}
-            </AlertDescription>
-          </Alert>
-        )}
+      {/* Success/Error Messages */}
+      {message && (
+        <Alert
+          className={`mb-6 ${message.type === "success" ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}
+        >
+          {message.type === "success" ? (
+            <CheckCircle className="h-4 w-4 text-green-600" />
+          ) : (
+            <AlertCircle className="h-4 w-4 text-red-600" />
+          )}
+          <AlertDescription className={message.type === "success" ? "text-green-800" : "text-red-800"}>
+            {message.text}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        <form action={handleSubmit}>
-          <Tabs defaultValue="profile" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="profile" className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="appearance" className="flex items-center gap-2">
-                <Palette className="h-4 w-4" />
-                Appearance
-              </TabsTrigger>
-              <TabsTrigger value="notifications" className="flex items-center gap-2">
-                <Bell className="h-4 w-4" />
-                Notifications
-              </TabsTrigger>
-              <TabsTrigger value="privacy" className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Privacy
-              </TabsTrigger>
-              <TabsTrigger value="relationship" className="flex items-center gap-2">
-                <Heart className="h-4 w-4" />
-                Relationship
-              </TabsTrigger>
-            </TabsList>
+      <form action={handleSubmit}>
+        <Tabs defaultValue="profile" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="profile" className="flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="relationship" className="flex items-center gap-2">
+              <Heart className="h-4 w-4" />
+              Relationship
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              Notifications
+            </TabsTrigger>
+            <TabsTrigger value="privacy" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Privacy
+            </TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="profile">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profile Information</CardTitle>
-                  <CardDescription>Update your personal information and bio</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+          {/* Profile Settings */}
+          <TabsContent value="profile">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Information</CardTitle>
+                <CardDescription>Update your personal information and profile details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="displayName">Display Name</Label>
+                    <Label htmlFor="firstName">First Name *</Label>
                     <Input
-                      id="displayName"
-                      name="displayName"
-                      value={settings.displayName}
-                      onChange={(e) => updateSetting("displayName", e.target.value)}
+                      id="firstName"
+                      name="firstName"
+                      value={settings.firstName}
+                      onChange={(e) => updateSetting("firstName", e.target.value)}
+                      placeholder="Enter your first name"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="lastName">Last Name *</Label>
                     <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={settings.email}
-                      onChange={(e) => updateSetting("email", e.target.value)}
+                      id="lastName"
+                      name="lastName"
+                      value={settings.lastName}
+                      onChange={(e) => updateSetting("lastName", e.target.value)}
+                      placeholder="Enter your last name"
                       required
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      name="bio"
-                      value={settings.bio || ""}
-                      onChange={(e) => updateSetting("bio", e.target.value)}
-                      placeholder="Tell us about yourself..."
-                      rows={3}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={settings.email}
+                    onChange={(e) => updateSetting("email", e.target.value)}
+                    placeholder="Enter your email address"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    name="bio"
+                    value={settings.bio}
+                    onChange={(e) => updateSetting("bio", e.target.value)}
+                    placeholder="Tell us a bit about yourself..."
+                    rows={4}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-            <TabsContent value="appearance">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Appearance Settings</CardTitle>
-                  <CardDescription>Customize how the app looks and feels</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="theme">Theme</Label>
-                    <Select
-                      name="theme"
-                      value={settings.theme}
-                      onValueChange={(value) => updateSetting("theme", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Light</SelectItem>
-                        <SelectItem value="dark">Dark</SelectItem>
-                        <SelectItem value="system">System</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select
-                      name="language"
-                      value={settings.language}
-                      onValueChange={(value) => updateSetting("language", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
-                        <SelectItem value="de">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="notifications">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>Choose how you want to be notified</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive notifications via email</p>
-                    </div>
-                    <Switch
-                      name="emailNotifications"
-                      checked={settings.emailNotifications}
-                      onCheckedChange={(checked) => updateSetting("emailNotifications", checked)}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Push Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive push notifications in your browser</p>
-                    </div>
-                    <Switch
-                      name="pushNotifications"
-                      checked={settings.pushNotifications}
-                      onCheckedChange={(checked) => updateSetting("pushNotifications", checked)}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Weekly Digest</Label>
-                      <p className="text-sm text-muted-foreground">Get a weekly summary of your activity</p>
-                    </div>
-                    <Switch
-                      name="weeklyDigest"
-                      checked={settings.weeklyDigest}
-                      onCheckedChange={(checked) => updateSetting("weeklyDigest", checked)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="privacy">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Privacy Settings</CardTitle>
-                  <CardDescription>Control your privacy and data sharing preferences</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="profileVisibility">Profile Visibility</Label>
-                    <Select
-                      name="profileVisibility"
-                      value={settings.profileVisibility}
-                      onValueChange={(value) => updateSetting("profileVisibility", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="public">Public</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="friends">Friends Only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Data Sharing</Label>
-                      <p className="text-sm text-muted-foreground">Allow anonymous data sharing for research</p>
-                    </div>
-                    <Switch
-                      name="dataSharing"
-                      checked={settings.dataSharing}
-                      onCheckedChange={(checked) => updateSetting("dataSharing", checked)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="relationship">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Relationship Preferences</CardTitle>
-                  <CardDescription>Set your default relationship assessment settings</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
+          {/* Relationship Preferences */}
+          <TabsContent value="relationship">
+            <Card>
+              <CardHeader>
+                <CardTitle>Relationship Preferences</CardTitle>
+                <CardDescription>Set your default relationship session settings and preferences</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="defaultDifficulty">Default Difficulty</Label>
                     <Select
                       name="defaultDifficulty"
                       value={settings.defaultDifficulty}
-                      onValueChange={(value) => updateSetting("defaultDifficulty", value)}
+                      onValueChange={(value: "easy" | "medium" | "hard") => updateSetting("defaultDifficulty", value)}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -363,31 +254,161 @@ export default function SettingsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label>Auto-submit Answers</Label>
-                      <p className="text-sm text-muted-foreground">Automatically submit when time runs out</p>
-                    </div>
-                    <Switch
-                      name="autoSubmitAnswers"
-                      checked={settings.autoSubmitAnswers}
-                      onCheckedChange={(checked) => updateSetting("autoSubmitAnswers", checked)}
-                    />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="autoSubmitAnswers">Auto-submit Answers</Label>
+                    <p className="text-sm text-muted-foreground">Automatically submit when time runs out</p>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  <Switch
+                    id="autoSubmitAnswers"
+                    name="autoSubmitAnswers"
+                    checked={settings.autoSubmitAnswers}
+                    onCheckedChange={(checked) => updateSetting("autoSubmitAnswers", checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          <div className="flex justify-end mt-6">
-            <Button type="submit" disabled={isPending} className="highlight-button">
-              {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Settings
-            </Button>
-          </div>
-        </form>
-      </div>
+          {/* Notification Settings */}
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle>Notification Preferences</CardTitle>
+                <CardDescription>
+                  Choose how you want to be notified about relationship insights and updates
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="emailNotifications">Email Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Receive email updates about your relationship progress
+                    </p>
+                  </div>
+                  <Switch
+                    id="emailNotifications"
+                    name="emailNotifications"
+                    checked={settings.emailNotifications}
+                    onCheckedChange={(checked) => updateSetting("emailNotifications", checked)}
+                  />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="pushNotifications">Push Notifications</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Get push notifications for important relationship milestones
+                    </p>
+                  </div>
+                  <Switch
+                    id="pushNotifications"
+                    name="pushNotifications"
+                    checked={settings.pushNotifications}
+                    onCheckedChange={(checked) => updateSetting("pushNotifications", checked)}
+                  />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="weeklyDigest">Weekly Digest</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Receive a weekly summary of your relationship insights
+                    </p>
+                  </div>
+                  <Switch
+                    id="weeklyDigest"
+                    name="weeklyDigest"
+                    checked={settings.weeklyDigest}
+                    onCheckedChange={(checked) => updateSetting("weeklyDigest", checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Privacy Settings */}
+          <TabsContent value="privacy">
+            <Card>
+              <CardHeader>
+                <CardTitle>Privacy & Security</CardTitle>
+                <CardDescription>Control your privacy settings and data sharing preferences</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="profileVisibility">Profile Visibility</Label>
+                  <Select
+                    name="profileVisibility"
+                    value={settings.profileVisibility}
+                    onValueChange={(value: "public" | "friends" | "private") =>
+                      updateSetting("profileVisibility", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="friends">Friends Only</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    Control who can see your profile and relationship progress
+                  </p>
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="shareProgress">Share Progress</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Allow sharing of your relationship progress with your partner
+                    </p>
+                  </div>
+                  <Switch
+                    id="shareProgress"
+                    name="shareProgress"
+                    checked={settings.shareProgress}
+                    onCheckedChange={(checked) => updateSetting("shareProgress", checked)}
+                  />
+                </div>
+                <Separator />
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label htmlFor="allowDataCollection">Allow Data Collection</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Help us improve AlignSynch by sharing anonymous usage data
+                    </p>
+                  </div>
+                  <Switch
+                    id="allowDataCollection"
+                    name="allowDataCollection"
+                    checked={settings.allowDataCollection}
+                    onCheckedChange={(checked) => updateSetting("allowDataCollection", checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Save Button */}
+        <div className="flex justify-end pt-6">
+          <Button type="submit" disabled={saving} className="min-w-[120px]">
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Save Settings"
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }

@@ -6,11 +6,11 @@
   :root {
     /* Charcoal Grey & Cyan Theme */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 240 10% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 240 10% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 240 10% 15%;
 
     /* Primary Accent - Cyan #0fc2f0 */
     --primary: 195 100% 50%;
@@ -24,7 +24,7 @@
 
     /* Accent & Borders */
     --accent: 195 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 240 5.9% 10%;
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 195 100% 50%;
@@ -38,29 +38,7 @@
     --success: 142 76% 36%;
     --success-foreground: 0 0% 98%;
     --warning: 38 92% 50%;
-    --warning-foreground: 240 10% 3.9%;
-  }
-
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 195 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 195 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 195 100% 50%;
+    --warning-foreground: 240 10% 15%;
   }
 }
 
@@ -77,7 +55,7 @@
 /* Themed Components with Cyan Accent */
 @layer components {
   .themed-card {
-    @apply rounded-xl bg-card border border-border shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-300 border-0 bg-card/50 backdrop-blur-sm;
+    @apply rounded-xl bg-card/50 backdrop-blur-sm border-border/50 shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-300;
   }
 
   .highlight-button {
@@ -99,11 +77,11 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent;
   }
 
   .gradient-bg {
-    @apply bg-gradient-to-br from-muted/30 via-background to-muted/50;
+    @apply bg-gradient-to-br from-muted/30 via-background to-primary/5;
   }
 
   .card-hover {
@@ -114,11 +92,11 @@
 /* Typography Scale - Clean & Professional */
 @layer components {
   .text-hero {
-    @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight;
+    @apply text-4xl md:text-6xl lg:text-7xl font-bold leading-tight;
   }
 
   .text-title {
-    @apply text-3xl md:text-4xl font-bold;
+    @apply text-3xl md:text-4xl lg:text-5xl font-bold;
   }
 
   .text-body {
@@ -126,7 +104,7 @@
   }
 
   .text-subtle {
-    @apply text-base text-muted-foreground;
+    @apply text-base md:text-lg text-muted-foreground;
   }
 
   .text-caption {
@@ -174,7 +152,7 @@
   }
 
   .grid-responsive {
-    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8;
   }
 }
 
@@ -188,7 +166,7 @@
 /* Fluid Tools Community Component Styling */
 @layer components {
   .community-hero {
-    @apply bg-gradient-to-br from-primary/5 via-background to-primary/10 relative overflow-hidden;
+    @apply bg-gradient-to-br from-muted/20 via-background to-primary/5 relative overflow-hidden;
   }
 
   .community-hero::before {
@@ -197,15 +175,15 @@
   }
 
   .feature-icon {
-    @apply h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground;
+    @apply h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center text-primary;
   }
 
   .step-number {
-    @apply h-16 w-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground text-2xl font-bold;
+    @apply w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white text-xl font-bold;
   }
 
   .benefit-check {
-    @apply h-5 w-5 rounded-full bg-primary flex items-center justify-center text-primary-foreground;
+    @apply w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-primary;
   }
 
   .social-proof-avatar {
