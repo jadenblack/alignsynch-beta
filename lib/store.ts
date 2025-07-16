@@ -1,128 +1,58 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-// Dashboard state interface
 interface DashboardState {
-  // Sidebar state
-  sidebarOpen: boolean
   sidebarCollapsed: boolean
-
-  // Theme and preferences
-  theme: "light" | "dark"
-
-  // Navigation state
-  activeSection: string
-  breadcrumbs: Array<{ label: string; href?: string }>
-
-  // Loading states
-  isLoading: boolean
-  loadingMessage: string
-
-  // Error handling
-  error: string | null
-
-  // Actions
-  toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
-  setActiveSection: (section: string) => void
-  setBreadcrumbs: (breadcrumbs: Array<{ label: string; href?: string }>) => void
-  setLoading: (loading: boolean, message?: string) => void
-  setError: (error: string | null) => void
-  setTheme: (theme: "light" | "dark") => void
+
+  // Analytics data
+  analytics: {
+    totalUsers: number
+    activeUsers: number
+    totalRevenue: number
+    conversionRate: number
+  }
+  setAnalytics: (analytics: DashboardState["analytics"]) => void
+
+  // User preferences
+  preferences: {
+    theme: "light" | "dark" | "system"
+    notifications: boolean
+    autoSave: boolean
+  }
+  setPreferences: (preferences: Partial<DashboardState["preferences"]>) => void
 }
 
-// Create the dashboard store with persistence
 export const useDashboardStore = create<DashboardState>()(
   persist(
-    (set, get) => ({
-      // Initial state
-      sidebarOpen: true,
+    (set) => ({
       sidebarCollapsed: false,
-      theme: "light",
-      activeSection: "dashboard",
-      breadcrumbs: [{ label: "Dashboard" }],
-      isLoading: false,
-      loadingMessage: "",
-      error: null,
+      setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
 
-      // Actions
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      analytics: {
+        totalUsers: 1234,
+        activeUsers: 892,
+        totalRevenue: 45678,
+        conversionRate: 12.5,
+      },
+      setAnalytics: (analytics) => set({ analytics }),
 
-      setSidebarCollapsed: (collapsed: boolean) => set({ sidebarCollapsed: collapsed }),
-
-      setActiveSection: (section: string) => set({ activeSection: section }),
-
-      setBreadcrumbs: (breadcrumbs: Array<{ label: string; href?: string }>) => set({ breadcrumbs }),
-
-      setLoading: (loading: boolean, message = "") => set({ isLoading: loading, loadingMessage: message }),
-
-      setError: (error: string | null) => set({ error }),
-
-      setTheme: (theme: "light" | "dark") => set({ theme }),
+      preferences: {
+        theme: "system",
+        notifications: true,
+        autoSave: true,
+      },
+      setPreferences: (newPreferences) =>
+        set((state) => ({
+          preferences: { ...state.preferences, ...newPreferences },
+        })),
     }),
     {
       name: "dashboard-storage",
       partialize: (state) => ({
         sidebarCollapsed: state.sidebarCollapsed,
-        theme: state.theme,
+        preferences: state.preferences,
       }),
     },
   ),
 )
-
-// Analytics store for dashboard metrics
-interface AnalyticsState {
-  metrics: {
-    totalUsers: number
-    activeUsers: number
-    totalContent: number
-    recentActivity: Array<{
-      id: string
-      type: string
-      message: string
-      timestamp: Date
-      user: string
-    }>
-  }
-
-  // Actions
-  updateMetrics: (metrics: Partial<AnalyticsState["metrics"]>) => void
-  addActivity: (activity: AnalyticsState["metrics"]["recentActivity"][0]) => void
-}
-
-export const useAnalyticsStore = create<AnalyticsState>((set, get) => ({
-  metrics: {
-    totalUsers: 1247,
-    activeUsers: 89,
-    totalContent: 342,
-    recentActivity: [
-      {
-        id: "1",
-        type: "user_login",
-        message: "User logged in",
-        timestamp: new Date(),
-        user: "john.doe@example.com",
-      },
-      {
-        id: "2",
-        type: "content_created",
-        message: "New content created",
-        timestamp: new Date(Date.now() - 1000 * 60 * 30),
-        user: "jane.smith@example.com",
-      },
-    ],
-  },
-
-  updateMetrics: (newMetrics) =>
-    set((state) => ({
-      metrics: { ...state.metrics, ...newMetrics },
-    })),
-
-  addActivity: (activity) =>
-    set((state) => ({
-      metrics: {
-        ...state.metrics,
-        recentActivity: [activity, ...state.metrics.recentActivity.slice(0, 9)],
-      },
-    })),
-}))

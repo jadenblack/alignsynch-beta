@@ -1,209 +1,289 @@
 "use client"
 
-import { useEffect } from "react"
-import { DashboardLayout } from "@/components/admin/dashboard-layout"
+import { useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { useAnalyticsStore } from "@/lib/store"
-import { Users, FileText, BarChart3, TrendingUp, Activity, Clock, AlertCircle, CheckCircle } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DashboardLayout } from "@/components/admin/dashboard-layout"
+import { ErrorBoundary } from "@/components/ui/error-boundary"
+import { useDashboardStore } from "@/lib/store"
+import { Users, Activity, DollarSign, TrendingUp, CheckCircle, AlertCircle, XCircle } from "lucide-react"
 
-// Dashboard metrics component
-function MetricsCards() {
-  const { metrics } = useAnalyticsStore()
+export default function AdminDashboardPage() {
+  const { data: session, status } = useSession()
+  const { analytics } = useDashboardStore()
 
-  const metricsData = [
+  if (status === "loading") {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </DashboardLayout>
+    )
+  }
+
+  if (!session) {
+    redirect("/auth/signin")
+  }
+
+  const stats = [
     {
       title: "Total Users",
-      value: metrics.totalUsers.toLocaleString(),
+      value: analytics.totalUsers.toLocaleString(),
       change: "+12%",
       changeType: "positive" as const,
       icon: Users,
-      description: "Active user accounts",
     },
     {
       title: "Active Users",
-      value: metrics.activeUsers.toLocaleString(),
+      value: analytics.activeUsers.toLocaleString(),
       change: "+8%",
       changeType: "positive" as const,
       icon: Activity,
-      description: "Users active in last 30 days",
     },
     {
-      title: "Total Content",
-      value: metrics.totalContent.toLocaleString(),
+      title: "Revenue",
+      value: `$${analytics.totalRevenue.toLocaleString()}`,
       change: "+23%",
       changeType: "positive" as const,
-      icon: FileText,
-      description: "Published content items",
+      icon: DollarSign,
     },
     {
       title: "Conversion Rate",
-      value: "3.2%",
-      change: "-0.5%",
+      value: `${analytics.conversionRate}%`,
+      change: "-2%",
       changeType: "negative" as const,
       icon: TrendingUp,
-      description: "Visitor to user conversion",
     },
   ]
 
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {metricsData.map((metric, index) => (
-        <Card key={index}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{metric.title}</CardTitle>
-            <metric.icon className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{metric.value}</div>
-            <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-              <Badge variant={metric.changeType === "positive" ? "default" : "destructive"} className="text-xs">
-                {metric.change}
-              </Badge>
-              <span>{metric.description}</span>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  )
-}
+  const recentActivity = [
+    {
+      id: 1,
+      type: "user_signup",
+      message: "New user registered: john.doe@example.com",
+      timestamp: "2 minutes ago",
+      status: "success",
+    },
+    {
+      id: 2,
+      type: "system_update",
+      message: "System backup completed successfully",
+      timestamp: "1 hour ago",
+      status: "success",
+    },
+    {
+      id: 3,
+      type: "error",
+      message: "Failed to send notification email",
+      timestamp: "2 hours ago",
+      status: "error",
+    },
+    {
+      id: 4,
+      type: "user_action",
+      message: "User updated profile settings",
+      timestamp: "3 hours ago",
+      status: "info",
+    },
+  ]
 
-// Recent activity component
-function RecentActivity() {
-  const { metrics } = useAnalyticsStore()
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Recent Activity
-        </CardTitle>
-        <CardDescription>Latest system activities and user actions</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {metrics.recentActivity.map((activity) => (
-            <div key={activity.id} className="flex items-center space-x-4">
-              <div className="flex-shrink-0">
-                {activity.type === "user_login" ? (
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-4 w-4 text-blue-500" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">{activity.message}</p>
-                <p className="text-xs text-muted-foreground">{activity.user}</p>
-              </div>
-              <div className="text-xs text-muted-foreground">{new Date(activity.timestamp).toLocaleTimeString()}</div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-// System status component
-function SystemStatus() {
-  const systemMetrics = [
-    { name: "API Response Time", value: 245, max: 1000, unit: "ms", status: "good" },
-    { name: "Database Performance", value: 78, max: 100, unit: "%", status: "good" },
-    { name: "Memory Usage", value: 65, max: 100, unit: "%", status: "warning" },
-    { name: "Storage Usage", value: 42, max: 100, unit: "%", status: "good" },
+  const systemStatus = [
+    { name: "API Server", status: "operational", uptime: "99.9%" },
+    { name: "Database", status: "operational", uptime: "99.8%" },
+    { name: "CDN", status: "degraded", uptime: "98.2%" },
+    { name: "Email Service", status: "operational", uptime: "99.5%" },
   ]
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
-          System Status
-        </CardTitle>
-        <CardDescription>Real-time system performance metrics</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {systemMetrics.map((metric, index) => (
-            <div key={index} className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{metric.name}</span>
-                <span className="text-muted-foreground">
-                  {metric.value}
-                  {metric.unit}
-                </span>
-              </div>
-              <Progress value={(metric.value / metric.max) * 100} className="h-2" />
+    <ErrorBoundary>
+      <DashboardLayout>
+        <div className="space-y-6">
+          {/* Header */}
+          <div>
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Welcome back, {session.user?.name}. Here's what's happening with your system.
+            </p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {stats.map((stat) => (
+              <Card key={stat.title}>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                  <stat.icon className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stat.value}</div>
+                  <p className="text-xs text-muted-foreground">
+                    <span className={stat.changeType === "positive" ? "text-green-600" : "text-red-600"}>
+                      {stat.change}
+                    </span>{" "}
+                    from last month
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Main Content */}
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Recent Activity */}
+            <div className="lg:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>Latest system events and user actions</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {recentActivity.map((activity) => (
+                      <div key={activity.id} className="flex items-start gap-3">
+                        <div className="mt-1">
+                          {activity.status === "success" && <CheckCircle className="h-4 w-4 text-green-600" />}
+                          {activity.status === "error" && <XCircle className="h-4 w-4 text-red-600" />}
+                          {activity.status === "info" && <AlertCircle className="h-4 w-4 text-blue-600" />}
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm">{activity.message}</p>
+                          <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
-export default function AdminDashboardPage() {
-  const { updateMetrics } = useAnalyticsStore()
-
-  // Simulate real-time data updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      updateMetrics({
-        activeUsers: Math.floor(Math.random() * 20) + 80,
-        totalUsers: 1247 + Math.floor(Math.random() * 10),
-      })
-    }, 30000) // Update every 30 seconds
-
-    return () => clearInterval(interval)
-  }, [updateMetrics])
-
-  return (
-    <DashboardLayout
-      title="Dashboard Overview"
-      breadcrumbs={[{ label: "Admin", href: "/admin" }, { label: "Dashboard" }]}
-    >
-      <div className="space-y-6">
-        {/* Metrics Cards */}
-        <MetricsCards />
-
-        {/* Main Content Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
-          <RecentActivity />
-          <SystemStatus />
-        </div>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common administrative tasks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm">
-                <Users className="h-4 w-4 mr-2" />
-                Manage Users
-              </Button>
-              <Button variant="outline" size="sm">
-                <FileText className="h-4 w-4 mr-2" />
-                Create Content
-              </Button>
-              <Button variant="outline" size="sm">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                View Reports
-              </Button>
-              <Button variant="outline" size="sm">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                System Alerts
-              </Button>
+            {/* System Status */}
+            <div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>System Status</CardTitle>
+                  <CardDescription>Current status of all services</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {systemStatus.map((service) => (
+                      <div key={service.name} className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium">{service.name}</p>
+                          <p className="text-xs text-muted-foreground">Uptime: {service.uptime}</p>
+                        </div>
+                        <Badge
+                          variant={
+                            service.status === "operational"
+                              ? "default"
+                              : service.status === "degraded"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                        >
+                          {service.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+          </div>
+
+          {/* Analytics Tabs */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics Overview</CardTitle>
+              <CardDescription>Detailed insights into your system performance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="users" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="users">Users</TabsTrigger>
+                  <TabsTrigger value="revenue">Revenue</TabsTrigger>
+                  <TabsTrigger value="performance">Performance</TabsTrigger>
+                </TabsList>
+                <TabsContent value="users" className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">User Growth</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">+{analytics.activeUsers}</div>
+                        <p className="text-xs text-muted-foreground">Active users this month</p>
+                        <Progress value={75} className="mt-2" />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">User Retention</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">87%</div>
+                        <p className="text-xs text-muted-foreground">7-day retention rate</p>
+                        <Progress value={87} className="mt-2" />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+                <TabsContent value="revenue" className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Monthly Revenue</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">+23% from last month</p>
+                        <Progress value={85} className="mt-2" />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Conversion Rate</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">{analytics.conversionRate}%</div>
+                        <p className="text-xs text-muted-foreground">-2% from last month</p>
+                        <Progress value={analytics.conversionRate * 8} className="mt-2" />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+                <TabsContent value="performance" className="space-y-4">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Response Time</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">245ms</div>
+                        <p className="text-xs text-muted-foreground">Average API response time</p>
+                        <Progress value={65} className="mt-2" />
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-base">Uptime</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-2xl font-bold">99.9%</div>
+                        <p className="text-xs text-muted-foreground">System uptime this month</p>
+                        <Progress value={99.9} className="mt-2" />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    </ErrorBoundary>
   )
 }

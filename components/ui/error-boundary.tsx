@@ -1,8 +1,9 @@
 "use client"
 
 import React from "react"
-import { Button } from "./button"
-import { AlertTriangle } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AlertTriangle, RefreshCw } from "lucide-react"
 
 interface ErrorBoundaryState {
   hasError: boolean
@@ -40,15 +41,28 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       }
 
       return (
-        <div className="flex h-screen items-center justify-center">
-          <div className="text-center space-y-4">
-            <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
-            <h2 className="text-2xl font-bold">Something went wrong</h2>
-            <p className="text-muted-foreground max-w-md">
-              {this.state.error?.message || "An unexpected error occurred"}
-            </p>
-            <Button onClick={this.resetError}>Try Again</Button>
-          </div>
+        <div className="flex items-center justify-center min-h-[400px] p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
+              </div>
+              <CardTitle>Something went wrong</CardTitle>
+              <CardDescription>An error occurred while rendering this component. Please try again.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <Button onClick={this.resetError} className="gap-2">
+                <RefreshCw className="h-4 w-4" />
+                Try Again
+              </Button>
+              {process.env.NODE_ENV === "development" && this.state.error && (
+                <details className="mt-4 text-left">
+                  <summary className="cursor-pointer text-sm font-medium">Error Details</summary>
+                  <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">{this.state.error.stack}</pre>
+                </details>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )
     }
