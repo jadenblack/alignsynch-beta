@@ -6,15 +6,15 @@
   :root {
     /* Charcoal Grey & Cyan Theme */
     --background: 0 0% 100%;
-    --foreground: 240 10% 15%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 15%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 15%;
+    --popover-foreground: 240 10% 3.9%;
 
     /* Primary Accent - Cyan #0fc2f0 */
     --primary: 195 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 0 0% 98%;
 
     /* Secondary & Muted Tones - Charcoal Greys */
     --secondary: 240 4.8% 95.9%;
@@ -28,17 +28,11 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 195 100% 50%;
-
-    /* General */
     --radius: 0.5rem;
 
     /* Semantic Colors */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 240 10% 15%;
   }
 }
 
@@ -55,11 +49,11 @@
 /* Themed Components with Cyan Accent */
 @layer components {
   .themed-card {
-    @apply rounded-xl bg-card/50 backdrop-blur-sm border-border/50 shadow-sm hover:border-primary/50 hover:shadow-md transition-all duration-300;
+    @apply rounded-xl bg-card/80 backdrop-blur-sm border border-border/50;
   }
 
   .highlight-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-5 py-2.5 font-medium transition-colors focus-emotional;
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground;
   }
 
   .themed-badge {
@@ -77,7 +71,7 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-foreground via-primary to-primary bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent;
   }
 
   .gradient-bg {
@@ -85,18 +79,18 @@
   }
 
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.02];
+    @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/30;
   }
 }
 
 /* Typography Scale - Clean & Professional */
 @layer components {
   .text-hero {
-    @apply text-4xl md:text-6xl lg:text-7xl font-bold leading-tight;
+    @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight;
   }
 
   .text-title {
-    @apply text-3xl md:text-4xl lg:text-5xl font-bold;
+    @apply text-3xl md:text-4xl font-bold;
   }
 
   .text-body {
@@ -104,7 +98,7 @@
   }
 
   .text-subtle {
-    @apply text-base md:text-lg text-muted-foreground;
+    @apply text-lg text-muted-foreground;
   }
 
   .text-caption {
@@ -169,11 +163,6 @@
     @apply bg-gradient-to-br from-muted/20 via-background to-primary/5 relative overflow-hidden;
   }
 
-  .community-hero::before {
-    content: "";
-    @apply absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/10 opacity-50;
-  }
-
   .feature-icon {
     @apply h-12 w-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/30 flex items-center justify-center text-primary;
   }
@@ -182,12 +171,8 @@
     @apply w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white text-xl font-bold;
   }
 
-  .benefit-check {
-    @apply w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-primary;
-  }
-
   .social-proof-avatar {
-    @apply w-8 h-8 rounded-full border-2 border-background;
+    @apply w-8 h-8 rounded-full border-2 border-background shadow-sm;
   }
 
   .rating-star {
@@ -195,10 +180,14 @@
   }
 
   .cta-primary {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground text-lg px-8 py-4 h-auto;
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl;
   }
 
   .cta-secondary {
-    @apply border-primary/30 text-primary hover:bg-primary/10 text-lg px-8 py-4 h-auto;
+    @apply border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground px-8 py-4 text-lg font-semibold rounded-lg transition-all duration-300;
+  }
+
+  .benefit-check {
+    @apply w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-primary;
   }
 }

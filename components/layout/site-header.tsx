@@ -1,38 +1,111 @@
 "use client"
 
-import type React from "react"
-
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
-
-import { siteConfig } from "@/config/site"
+import { Button } from "@/components/ui/button"
+import { Menu, X, Map } from "lucide-react"
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 
-interface SiteHeaderProps extends React.HTMLAttributes<HTMLElement> {}
+const navigationLinks = [
+  { href: "/", label: "Home" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/focus-areas", label: "Focus Areas" },
+  { href: "/our-journey", label: "Our Journey" },
+  { href: "/profile", label: "Profile" },
+]
 
-export function SiteHeader({ className, ...props }: SiteHeaderProps) {
+export function SiteHeader() {
   const pathname = usePathname()
-
-  const baseLink =
-    "font-medium transition-colors hover:text-foreground/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 data-[active]:text-foreground"
-  const activeLink = "text-foreground"
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
-    <header className={cn("container z-50 bg-background py-2", className)} {...props}>
-      <div className="flex items-center justify-between">
-        <Link href="/" className="mr-4 flex items-center space-x-2">
-          {/* <Icons.logo className="h-6 w-6" /> */}
-          <span className="hidden font-bold sm:inline-block">{siteConfig.name}</span>
-        </Link>
-        <nav className="flex items-center space-x-6">
-          <Link href="/" className={cn(baseLink, pathname === "/" && activeLink)}>
-            Home
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        {/* Logo and Sitemap */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Image src="/logo.png" alt="AlignSynch Logo" width={160} height={25} priority />
           </Link>
-          <Link href="/home-1" className={cn(baseLink, pathname === "/home-1" && activeLink)}>
-            Home.1
+          <Link
+            href="/sitemap"
+            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+            title="Site Map"
+          >
+            <Map className="h-5 w-5" />
           </Link>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex gap-6">
+          {navigationLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "font-medium transition-colors hover:text-primary",
+                pathname === link.href ? "text-primary" : "text-muted-foreground",
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
+
+        {/* Auth Buttons */}
+        <div className="hidden md:flex gap-2">
+          <Link href="/login">
+            <Button variant="outline">Login</Button>
+          </Link>
+          <Link href="/signup">
+            <Button className="highlight-button">Sign Up</Button>
+          </Link>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
       </div>
+
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden border-t bg-background">
+          <div className="container mx-auto px-4 py-4 space-y-4">
+            <nav className="flex flex-col space-y-3">
+              {navigationLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "font-medium transition-colors hover:text-primary py-2",
+                    pathname === link.href ? "text-primary" : "text-muted-foreground",
+                  )}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="flex gap-2 pt-4 border-t">
+              <Link href="/login" className="flex-1">
+                <Button variant="outline" className="w-full bg-transparent">
+                  Login
+                </Button>
+              </Link>
+              <Link href="/signup" className="flex-1">
+                <Button className="w-full highlight-button">Sign Up</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

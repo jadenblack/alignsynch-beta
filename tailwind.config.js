@@ -26,17 +26,6 @@ module.exports = {
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "#0fc2f0",
-          50: "#f0fcff",
-          100: "#e0f9fe",
-          200: "#baf2fd",
-          300: "#7de8fc",
-          400: "#38d9f8",
-          500: "#0fc2f0",
-          600: "#0891b2",
-          700: "#0e7490",
-          800: "#155e75",
-          900: "#164e63",
-          950: "#083344",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -83,12 +72,12 @@ module.exports = {
           "50%": { transform: "translateY(-10px) rotate(6deg)" },
         },
         "warm-pulse": {
-          "0%, 100%": { transform: "scale(1) rotate(-3deg)" },
-          "50%": { transform: "scale(1.05) rotate(-3deg)" },
+          "0%, 100%": { transform: "scale(1) rotate(-3deg)", opacity: "1" },
+          "50%": { transform: "scale(1.05) rotate(-3deg)", opacity: "0.9" },
         },
         "connection-flow": {
-          "0%, 100%": { opacity: "0.3", transform: "scale(1)" },
-          "50%": { opacity: "0.8", transform: "scale(1.1)" },
+          "0%, 100%": { transform: "scale(1)", opacity: "0.3" },
+          "50%": { transform: "scale(1.2)", opacity: "0.6" },
         },
         "fade-in-up": {
           "0%": { opacity: "0", transform: "translateY(20px)" },
@@ -109,7 +98,7 @@ module.exports = {
         "gentle-bounce": "gentle-bounce 3s ease-in-out infinite",
         "warm-pulse": "warm-pulse 4s ease-in-out infinite",
         "connection-flow": "connection-flow 6s ease-in-out infinite",
-        "fade-in-up": "fade-in-up 0.6s ease-out forwards",
+        "fade-in-up": "fade-in-up 0.6s ease-out",
         float: "float 3s ease-in-out infinite",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },

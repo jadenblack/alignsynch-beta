@@ -26,85 +26,55 @@ export interface UserSettings {
   allowDataCollection: boolean
 }
 
-export interface SettingsResponse {
+// Simulate database operations
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+export async function saveUserSettings(formData: FormData): Promise<{
   success: boolean
   message: string
   data?: UserSettings
-}
-
-// Simulate database storage (replace with real database calls)
-let userSettingsStore: UserSettings = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  bio: "",
-  defaultDifficulty: "medium",
-  defaultQuestionCount: 10,
-  defaultTimeLimit: 60,
-  autoSubmitAnswers: false,
-  emailNotifications: true,
-  pushNotifications: true,
-  weeklyDigest: false,
-  profileVisibility: "friends",
-  shareProgress: true,
-  allowDataCollection: true,
-}
-
-export async function saveUserSettings(formData: FormData): Promise<SettingsResponse> {
+}> {
   try {
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await delay(1000)
 
-    // Extract form data
-    const firstName = formData.get("firstName") as string
-    const lastName = formData.get("lastName") as string
-    const email = formData.get("email") as string
-    const bio = formData.get("bio") as string
-    const defaultDifficulty = formData.get("defaultDifficulty") as "easy" | "medium" | "hard"
-    const defaultQuestionCount = Number.parseInt(formData.get("defaultQuestionCount") as string)
-    const defaultTimeLimit = Number.parseInt(formData.get("defaultTimeLimit") as string)
-    const autoSubmitAnswers = formData.get("autoSubmitAnswers") === "on"
-    const emailNotifications = formData.get("emailNotifications") === "on"
-    const pushNotifications = formData.get("pushNotifications") === "on"
-    const weeklyDigest = formData.get("weeklyDigest") === "on"
-    const profileVisibility = formData.get("profileVisibility") as "public" | "friends" | "private"
-    const shareProgress = formData.get("shareProgress") === "on"
-    const allowDataCollection = formData.get("allowDataCollection") === "on"
+    // Extract and validate form data
+    const settings: UserSettings = {
+      firstName: formData.get("firstName") as string,
+      lastName: formData.get("lastName") as string,
+      email: formData.get("email") as string,
+      bio: formData.get("bio") as string,
+      defaultDifficulty: formData.get("defaultDifficulty") as "easy" | "medium" | "hard",
+      defaultQuestionCount: Number.parseInt(formData.get("defaultQuestionCount") as string),
+      defaultTimeLimit: Number.parseInt(formData.get("defaultTimeLimit") as string),
+      autoSubmitAnswers: formData.get("autoSubmitAnswers") === "on",
+      emailNotifications: formData.get("emailNotifications") === "on",
+      pushNotifications: formData.get("pushNotifications") === "on",
+      weeklyDigest: formData.get("weeklyDigest") === "on",
+      profileVisibility: formData.get("profileVisibility") as "public" | "friends" | "private",
+      shareProgress: formData.get("shareProgress") === "on",
+      allowDataCollection: formData.get("allowDataCollection") === "on",
+    }
 
-    // Validation
-    if (!firstName || !lastName || !email) {
+    // Basic validation
+    if (!settings.firstName || !settings.lastName || !settings.email) {
       return {
         success: false,
         message: "Please fill in all required fields (First Name, Last Name, Email)",
       }
     }
 
-    // Basic email validation
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(settings.email)) {
       return {
         success: false,
         message: "Please enter a valid email address",
       }
     }
 
-    // Update settings (in real app, this would be a database call)
-    userSettingsStore = {
-      firstName,
-      lastName,
-      email,
-      bio,
-      defaultDifficulty,
-      defaultQuestionCount,
-      defaultTimeLimit,
-      autoSubmitAnswers,
-      emailNotifications,
-      pushNotifications,
-      weeklyDigest,
-      profileVisibility,
-      shareProgress,
-      allowDataCollection,
-    }
+    // Simulate saving to database
+    console.log("Saving user settings:", settings)
 
     // Revalidate the settings page to show updated data
     revalidatePath("/settings")
@@ -112,7 +82,7 @@ export async function saveUserSettings(formData: FormData): Promise<SettingsResp
     return {
       success: true,
       message: "Settings saved successfully!",
-      data: userSettingsStore,
+      data: settings,
     }
   } catch (error) {
     console.error("Error saving settings:", error)
@@ -123,21 +93,42 @@ export async function saveUserSettings(formData: FormData): Promise<SettingsResp
   }
 }
 
-export async function getUserSettings(): Promise<SettingsResponse> {
+export async function getUserSettings(): Promise<{
+  success: boolean
+  data?: UserSettings
+  message?: string
+}> {
   try {
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    await delay(500)
+
+    // Simulate fetching from database
+    const mockSettings: UserSettings = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      bio: "Passionate about building stronger relationships through better communication.",
+      defaultDifficulty: "medium",
+      defaultQuestionCount: 10,
+      defaultTimeLimit: 60,
+      autoSubmitAnswers: false,
+      emailNotifications: true,
+      pushNotifications: false,
+      weeklyDigest: true,
+      profileVisibility: "friends",
+      shareProgress: true,
+      allowDataCollection: false,
+    }
 
     return {
       success: true,
-      message: "Settings loaded successfully",
-      data: userSettingsStore,
+      data: mockSettings,
     }
   } catch (error) {
-    console.error("Error loading settings:", error)
+    console.error("Error fetching settings:", error)
     return {
       success: false,
-      message: "Failed to load settings. Please try again.",
+      message: "Failed to load settings",
     }
   }
 }
