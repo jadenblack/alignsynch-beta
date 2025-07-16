@@ -1,10 +1,12 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Check, ChevronDown, Menu } from "lucide-react"
 import Link from "next/link"
 
-export default function Component() {
+export default function HomeOne() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-400 via-blue-300 to-gray-100">
       {/* Header */}
@@ -75,7 +77,7 @@ export default function Component() {
         {/* Central Circle */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-24 h-24 bg-amber-200 rounded-full mb-6">
-            <div className="w-12 h-12 bg-amber-300 rounded-full"></div>
+            <div className="w-12 h-12 bg-amber-300 rounded-full" />
           </div>
           <p className="text-lg text-gray-700 max-w-2xl mx-auto">See how easy it is to improve any relationship.</p>
           <p className="text-lg font-semibold text-gray-800 mt-4">Think of it as a new type of communication tool.</p>
@@ -107,8 +109,8 @@ export default function Component() {
                 "Hobbies",
                 "Work-Life Balance",
                 "More + Create Your Own",
-              ].map((item, index) => (
-                <div key={index} className="flex items-center space-x-3">
+              ].map((item) => (
+                <div key={item} className="flex items-center space-x-3">
                   <Check className="w-5 h-5 text-slate-600 flex-shrink-0" />
                   <span className="text-gray-700">{item}</span>
                 </div>
@@ -140,8 +142,8 @@ export default function Component() {
                 "Strategic Planning",
                 "One-Board Member/Owner",
                 "More + Create Your Own",
-              ].map((item, index) => (
-                <div key={index} className="flex items-center space-x-3">
+              ].map((item) => (
+                <div key={item} className="flex items-center space-x-3">
                   <Check className="w-5 h-5 text-blue-600 flex-shrink-0" />
                   <span className="text-gray-700">{item}</span>
                 </div>
@@ -197,8 +199,8 @@ export default function Component() {
               "I THINK you... YOU THINK I'm not important to you anymore",
               "But I FEEL... I'm not important to you anymore",
               "So I THINK... I'm not important to you anymore",
-            ].map((text, index) => (
-              <Card key={index} className="p-4">
+            ].map((text) => (
+              <Card key={text} className="p-4">
                 <CardContent className="p-0">
                   <p className="text-center text-gray-700">{text}</p>
                 </CardContent>
@@ -265,8 +267,8 @@ export default function Component() {
                 question: "Clearer Sense of Purpose",
                 answer: "Aligned relationships help clarify life goals and provide a stronger sense of purpose.",
               },
-            ].map((item, index) => (
-              <Collapsible key={index}>
+            ].map((item) => (
+              <Collapsible key={item.question}>
                 <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg shadow-sm hover:bg-gray-50">
                   <span className="font-medium text-left">{item.question}</span>
                   <ChevronDown className="w-5 h-5" />

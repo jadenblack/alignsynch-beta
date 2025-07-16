@@ -1,112 +1,80 @@
 "use client"
 
+import type React from "react"
+
 import Link from "next/link"
-import Image from "next/image"
 import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Menu, X, Map } from "lucide-react"
-import { useState } from "react"
+
 import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Menu } from "lucide-react"
 
-const navigationLinks = [
-  { href: "/", label: "Home" },
-  { href: "/home-1", label: "Home.1" },
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/focus-areas", label: "Focus Areas" },
-  { href: "/our-journey", label: "Our Journey" },
-  { href: "/profile", label: "Profile" },
-]
+interface SiteHeaderProps extends React.HTMLAttributes<HTMLElement> {}
 
-export function SiteHeader() {
+const linkStyles = ({ variant }: { variant: "default" | "active" }) =>
+  cn(
+    buttonVariants({ variant: "ghost" }),
+    "font-medium data-[active=true]:bg-muted data-[active=true]:text-muted-foreground",
+    variant === "active" && "bg-muted text-muted-foreground",
+  )
+
+export function SiteHeader({ className, ...props }: SiteHeaderProps) {
   const pathname = usePathname()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        {/* Logo and Sitemap */}
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Image src="/logo.png" alt="AlignSynch Logo" width={160} height={25} priority />
-          </Link>
-          <Link
-            href="/sitemap"
-            className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-            title="Site Map"
-          >
-            <Map className="h-5 w-5" />
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex gap-6">
-          {navigationLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "font-medium transition-colors hover:text-primary",
-                pathname === link.href ? "text-primary" : "text-muted-foreground",
-              )}
-            >
-              {link.label}
+    <header className={cn("sticky top-0 z-40 w-full border-b bg-background", className)} {...props}>
+      <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
+        <Link href="/" className="hidden font-bold sm:block">
+          Acme
+        </Link>
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <nav className="hidden md:flex">
+            <Link href="/" className={cn(linkStyles({ variant: pathname === "/" ? "active" : "ghost" }))}>
+              Home
             </Link>
-          ))}
-        </nav>
-
-        {/* Auth Buttons */}
-        <div className="hidden md:flex gap-2">
-          <Link href="/login">
-            <Button variant="outline">Login</Button>
-          </Link>
-          <Link href="/signup">
-            <Button className="highlight-button">Sign Up</Button>
-          </Link>
+            <Link href="/home-1" className={cn(linkStyles({ variant: pathname === "/home-1" ? "active" : "ghost" }))}>
+              Home.1
+            </Link>
+            {/* <Link
+              href="/examples/cards"
+              className={cn(linkStyles({ variant: pathname?.startsWith('/examples') ? 'active' : 'ghost' }))}
+            >
+              Examples
+            </Link> */}
+          </nav>
+          <Sheet>
+            <SheetTrigger className={cn(buttonVariants({ variant: "ghost" }), "mr-2 p-2 md:hidden")}>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Open menu</span>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-full sm:max-w-[300px]">
+              <SheetHeader>
+                <SheetTitle>Menu</SheetTitle>
+                <SheetDescription>Navigate through the site.</SheetDescription>
+              </SheetHeader>
+              <Link href="/" className={cn(linkStyles({ variant: pathname === "/" ? "active" : "ghost" }), "w-full")}>
+                Home
+              </Link>
+              <Link
+                href="/home-1"
+                className={cn(linkStyles({ variant: pathname === "/home-1" ? "active" : "ghost" }), "w-full")}
+              >
+                Home.1
+              </Link>
+              {/* <Link
+                href="/examples/cards"
+                className={cn(
+                  linkStyles({ variant: pathname?.startsWith('/examples') ? 'active' : 'ghost' }),
+                  'w-full'
+                )}
+              >
+                Examples
+              </Link> */}
+            </SheetContent>
+          </Sheet>
         </div>
-
-        {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </Button>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden border-t bg-background">
-          <div className="container mx-auto px-4 py-4 space-y-4">
-            <nav className="flex flex-col space-y-3">
-              {navigationLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "font-medium transition-colors hover:text-primary py-2",
-                    pathname === link.href ? "text-primary" : "text-muted-foreground",
-                  )}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="flex gap-2 pt-4 border-t">
-              <Link href="/login" className="flex-1">
-                <Button variant="outline" className="w-full bg-transparent">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/signup" className="flex-1">
-                <Button className="w-full highlight-button">Sign Up</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </header>
   )
 }
