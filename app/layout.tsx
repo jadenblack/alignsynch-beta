@@ -5,6 +5,7 @@ import "./globals.css"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SiteFooter } from "@/components/layout/site-footer"
 import { cn } from "@/lib/utils"
+import Providers from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -25,11 +26,13 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
-        <div className="relative flex min-h-screen flex-col">
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-        </div>
+        <Providers>
+          <div className="relative flex min-h-screen flex-col">
+            <SiteHeader />
+            <main className="flex-1">{children}</main>
+            <SiteFooter />
+          </div>
+        </Providers>
       </body>
     </html>
   )
