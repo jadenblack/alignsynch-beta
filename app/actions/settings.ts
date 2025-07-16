@@ -2,58 +2,81 @@
 
 import { z } from "zod"
 
-// Define the settings schema for validation
+// Define the settings schema
 const settingsSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email format"),
-  notifications: z.boolean(),
-  theme: z.enum(["light", "dark", "system"]),
-  language: z.string(),
-  timezone: z.string(),
-  relationshipPreferences: z.object({
-    defaultDifficulty: z.string(),
-    defaultQuestionCount: z.string(),
-    defaultTimeLimit: z.string(),
-    autoSubmitAnswers: z.boolean(),
-  }),
+  // Profile settings
+  displayName: z.string().min(1, "Display name is required"),
+  email: z.string().email("Invalid email address"),
+  bio: z.string().optional(),
+
+  // Appearance settings
+  theme: z.enum(["light", "dark", "system"]).default("light"),
+  language: z.string().default("en"),
+
+  // Notification settings
+  emailNotifications: z.boolean().default(true),
+  pushNotifications: z.boolean().default(false),
+  weeklyDigest: z.boolean().default(true),
+
+  // Privacy settings
+  profileVisibility: z.enum(["public", "private", "friends"]).default("public"),
+  dataSharing: z.boolean().default(false),
+
+  // Relationship settings
+  defaultDifficulty: z.enum(["easy", "medium", "hard"]).default("medium"),
+  defaultQuestionCount: z.number().min(5).max(50).default(10),
+  defaultTimeLimit: z.number().min(30).max(300).default(60),
+  autoSubmitAnswers: z.boolean().default(false),
 })
 
 export type UserSettings = z.infer<typeof settingsSchema>
 
 // Simulate database storage (replace with actual database calls)
 let userSettingsStore: UserSettings = {
-  name: "",
-  email: "",
-  notifications: true,
+  displayName: "John Doe",
+  email: "john@example.com",
+  bio: "Passionate about building better relationships",
   theme: "light",
   language: "en",
-  timezone: "UTC",
-  relationshipPreferences: {
-    defaultDifficulty: "medium",
-    defaultQuestionCount: "10",
-    defaultTimeLimit: "60",
-    autoSubmitAnswers: false,
-  },
+  emailNotifications: true,
+  pushNotifications: false,
+  weeklyDigest: true,
+  profileVisibility: "public",
+  dataSharing: false,
+  defaultDifficulty: "medium",
+  defaultQuestionCount: 10,
+  defaultTimeLimit: 60,
+  autoSubmitAnswers: false,
+}
+
+export async function getUserSettings(): Promise<UserSettings> {
+  // Simulate API delay
+  await new Promise((resolve) => setTimeout(resolve, 500))
+
+  return userSettingsStore
 }
 
 export async function saveUserSettings(formData: FormData) {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
-
   try {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Extract form data
     const rawData = {
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      notifications: formData.get("notifications") === "on",
-      theme: formData.get("theme") as string,
-      language: formData.get("language") as string,
-      timezone: formData.get("timezone") as string,
-      relationshipPreferences: {
-        defaultDifficulty: formData.get("defaultDifficulty") as string,
-        defaultQuestionCount: formData.get("defaultQuestionCount") as string,
-        defaultTimeLimit: formData.get("defaultTimeLimit") as string,
-        autoSubmitAnswers: formData.get("autoSubmitAnswers") === "on",
-      },
+      displayName: formData.get("displayName"),
+      email: formData.get("email"),
+      bio: formData.get("bio"),
+      theme: formData.get("theme"),
+      language: formData.get("language"),
+      emailNotifications: formData.get("emailNotifications") === "on",
+      pushNotifications: formData.get("pushNotifications") === "on",
+      weeklyDigest: formData.get("weeklyDigest") === "on",
+      profileVisibility: formData.get("profileVisibility"),
+      dataSharing: formData.get("dataSharing") === "on",
+      defaultDifficulty: formData.get("defaultDifficulty"),
+      defaultQuestionCount: Number.parseInt(formData.get("defaultQuestionCount") as string) || 10,
+      defaultTimeLimit: Number.parseInt(formData.get("defaultTimeLimit") as string) || 60,
+      autoSubmitAnswers: formData.get("autoSubmitAnswers") === "on",
     }
 
     // Validate the data
@@ -81,12 +104,4 @@ export async function saveUserSettings(formData: FormData) {
       message: "Failed to save settings. Please try again.",
     }
   }
-}
-
-export async function getUserSettings(): Promise<UserSettings> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 500))
-
-  // Return from "database" (replace with actual database call)
-  return userSettingsStore
 }
