@@ -50,7 +50,39 @@ const users: User[] = [
     permissions: ROLE_PERMISSIONS.manager,
     avatar: "/placeholder.svg?height=40&width=40",
   },
+  {
+    id: "3",
+    email: "initiator@alignsynch.com",
+    name: "Sarah Johnson",
+    role: "user",
+    permissions: ROLE_PERMISSIONS.user,
+    avatar: "/placeholder.svg?height=40&width=40",
+  },
+  {
+    id: "4",
+    email: "counterparty@alignsynch.com",
+    name: "Michael Chen",
+    role: "user",
+    permissions: ROLE_PERMISSIONS.user,
+    avatar: "/placeholder.svg?height=40&width=40",
+  },
+  {
+    id: "5",
+    email: "coach@alignsynch.com",
+    name: "Dr. Emily Rodriguez",
+    role: "manager",
+    permissions: ROLE_PERMISSIONS.manager,
+    avatar: "/placeholder.svg?height=40&width=40",
+  },
 ]
+
+// Quick login credentials for development
+export const DEV_CREDENTIALS = {
+  admin: { email: "admin@alignsynch.com", password: "password", name: "Admin User" },
+  initiator: { email: "initiator@alignsynch.com", password: "password", name: "Sarah Johnson" },
+  counterparty: { email: "counterparty@alignsynch.com", password: "password", name: "Michael Chen" },
+  coach: { email: "coach@alignsynch.com", password: "password", name: "Dr. Emily Rodriguez" },
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
