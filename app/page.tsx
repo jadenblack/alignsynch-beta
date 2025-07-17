@@ -1,347 +1,254 @@
-"use client"
-
 import Link from "next/link"
-import { ArrowRight, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import Image from "next/image"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import {
+  Heart,
+  Users,
+  Target,
+  TrendingUp,
+  CheckCircle,
+  Star,
+  ArrowRight,
+  Play,
+  MessageCircle,
+  Shield,
+  Zap,
+} from "lucide-react"
 
-export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY
-      setIsScrolled(scrollTop > 50)
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
+export default function HomePage() {
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Atmospheric Background */}
-      <div className="fixed inset-0 -z-10">
-        {/* Main radial gradient - Reverted to original */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse at center, #2d4663 0%, #1a2b42 50%, #0a1628 100%)",
-          }}
-        />
-
-        {/* Subtle noise texture */}
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3Cfilter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
-
-      {/* Enhanced Space Animation Video Background */}
-      <div className="fixed inset-0 -z-5">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-70"
-          style={{
-            filter: "brightness(0.8) contrast(1.2) saturate(1.1)",
-          }}
-        >
-          <source src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Space-BjlPAfapX976c44BSkWOSKcQOf4YJZ.mp4" type="video/mp4" />
-        </video>
-
-        {/* Dynamic overlay that pulses with the animation - Reverted to original */}
-        <div
-          className="absolute inset-0 animate-pulse"
-          style={{
-            background:
-              "radial-gradient(ellipse at center, rgba(45, 70, 99, 0.2) 0%, rgba(26, 43, 66, 0.4) 50%, rgba(10, 22, 40, 0.6) 100%)",
-            animationDuration: "4s",
-          }}
-        />
-      </div>
-
-      {/* Navigation */}
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 py-3 sm:py-4 transition-all duration-300 ${
-          isScrolled ? "bg-white/10 backdrop-blur-md border-b border-white/20" : "bg-transparent"
-        }`}
-      >
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          {/* Logo */}
-          <Link href="/" className="flex items-center flex-shrink-0">
-            <Image
-              src="/alignsynch-logo.png"
-              alt="AlignSynch"
-              width={180}
-              height={40}
-              className="h-6 sm:h-7 md:h-8 w-auto"
-            />
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
-            <Link
-              href="#"
-              className="text-white/90 hover:text-white text-sm font-medium transition-colors whitespace-nowrap"
-            >
-              Relationship Demos
-            </Link>
-            <Link
-              href="#"
-              className="text-white/90 hover:text-white text-sm font-medium transition-colors whitespace-nowrap"
-            >
-              Plans &amp; Pricing
-            </Link>
-            <Link
-              href="#"
-              className="text-white/90 hover:text-white text-sm font-medium transition-colors whitespace-nowrap"
-            >
-              How it Works
-            </Link>
-            <Link href="#" className="text-white/90 hover:text-white text-sm font-medium transition-colors">
-              FAQ
-            </Link>
-            <Link
-              href="#"
-              className="text-white/90 hover:text-white text-sm font-medium transition-colors whitespace-nowrap"
-            >
-              About Us
-            </Link>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="community-hero py-20 lg:py-32 relative">
+        <div className="container mx-auto px-4 text-center relative z-10">
+          {/* Social Proof */}
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="flex -space-x-2">
+              <div className="social-proof-avatar bg-gradient-to-br from-primary/20 to-primary/40"></div>
+              <div className="social-proof-avatar bg-gradient-to-br from-primary/30 to-primary/50"></div>
+              <div className="social-proof-avatar bg-gradient-to-br from-primary/40 to-primary/60"></div>
+              <div className="social-proof-avatar bg-gradient-to-br from-primary/50 to-primary/70"></div>
+            </div>
+            <div className="flex items-center gap-1 ml-3">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-4 h-4 rating-star fill-current" />
+              ))}
+              <span className="text-sm text-muted-foreground ml-2">Trusted by 10,000+ couples</span>
+            </div>
           </div>
 
-          {/* Desktop CTA */}
-          <div className="hidden md:flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
-            <Link href="#" className="text-white/90 hover:text-white text-sm font-medium transition-colors">
-              Login
-            </Link>
-            <Button
-              className="bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 text-xs sm:text-sm"
-              size="sm"
-            >
-              <span className="hidden sm:inline">Get Started</span>
-              <span className="sm:hidden">Start</span>
-              <ArrowRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
-            </Button>
-          </div>
+          {/* Main Headline */}
+          <h1 className="text-hero gradient-text mb-6 max-w-4xl mx-auto">
+            Transform Your Relationships with AI-Powered Alignment
+          </h1>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-white p-1"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label="Toggle mobile menu"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
-          </button>
-        </div>
+          <p className="text-body text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Discover deeper connections, resolve conflicts faster, and build stronger relationships through personalized
+            insights and guided conversations.
+          </p>
 
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden mt-4 p-4 bg-white/10 backdrop-blur-md rounded-lg border border-white/20 mx-4 sm:mx-6">
-            <div className="flex flex-col space-y-4">
-              <Link href="#" className="text-white/90 hover:text-white text-sm font-medium py-1">
-                Relationship Demos
-              </Link>
-              <Link href="#" className="text-white/90 hover:text-white text-sm font-medium py-1">
-                Plans &amp; Pricing
-              </Link>
-              <Link href="#" className="text-white/90 hover:text-white text-sm font-medium py-1">
-                How it Works
-              </Link>
-              <Link href="#" className="text-white/90 hover:text-white text-sm font-medium py-1">
-                FAQ
-              </Link>
-              <Link href="#" className="text-white/90 hover:text-white text-sm font-medium py-1">
-                About Us
-              </Link>
-              <hr className="border-white/20" />
-              <Link href="#" className="text-white/90 hover:text-white text-sm font-medium py-1">
-                Login
-              </Link>
-              <Button
-                className="bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-sm w-full justify-center mt-2"
-                size="sm"
-              >
-                Get Started
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+            <Link href="/signup">
+              <Button className="cta-primary">
+                Start Your Journey
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+            </Link>
+            <Link href="/demo">
+              <Button variant="outline" className="cta-secondary bg-transparent">
+                <Play className="mr-2 h-4 w-4" />
+                Watch Demo
+              </Button>
+            </Link>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              <span>Privacy Protected</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-primary" />
+              <span>Instant Results</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-primary" />
+              <span>Science-Backed</span>
             </div>
           </div>
-        )}
-      </nav>
+        </div>
+      </section>
 
-      {/* Hero Section */}
-      <main className="relative z-10 min-h-screen flex items-center pt-16 sm:pt-20 md:pt-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 xl:gap-16 items-center">
-            {/* Left Column - Hero Content */}
-            <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
-              {/* Pre-title with gradient animation */}
-              <h3
-                className="text-transparent bg-clip-text mb-3 sm:mb-4 font-medium animate-fade-in font-sans"
-                style={{
-                  fontSize: "clamp(1rem, 3vw, 1.5rem)",
-                  background: "linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57, #ff9ff3)",
-                  backgroundSize: "300% 300%",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  animation: "gradientShift 4s ease-in-out infinite",
-                }}
-              >
-                Relationships can be Hard
-              </h3>
+      {/* Features Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Core Features</Badge>
+            <h2 className="text-title mb-4">Everything you need for relationship success</h2>
+            <p className="text-subtle max-w-2xl mx-auto">
+              Our comprehensive platform provides tools, insights, and guidance to help you build stronger, more aligned
+              relationships.
+            </p>
+          </div>
 
-              {/* Main Headline with enhanced styling */}
-              <h1
-                className="text-white font-light leading-tight tracking-tight mb-4 sm:mb-6 relative"
-                style={{
-                  fontSize: "clamp(2rem, 6vw, 4rem)",
-                  lineHeight: "1.1",
-                  letterSpacing: "-0.02em",
-                  background: "linear-gradient(90deg, #ffffff 0%, #e2e8f0 50%, #ffffff 100%)",
-                  backgroundSize: "200% 100%",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                  animation: "shimmer 3s ease-in-out infinite",
-                }}
-              >
-                {"AlignSynch makes it easier"}
-              </h1>
+          <div className="grid-responsive">
+            {[
+              {
+                icon: Heart,
+                title: "Relationship Assessment",
+                description:
+                  "Deep insights into your relationship dynamics, communication patterns, and compatibility factors.",
+              },
+              {
+                icon: MessageCircle,
+                title: "Guided Conversations",
+                description: "AI-powered conversation starters and conflict resolution tools for meaningful dialogue.",
+              },
+              {
+                icon: Target,
+                title: "Goal Alignment",
+                description: "Identify shared values, align life goals, and create a roadmap for your future together.",
+              },
+              {
+                icon: TrendingUp,
+                title: "Progress Tracking",
+                description: "Monitor your relationship growth with detailed analytics and milestone celebrations.",
+              },
+              {
+                icon: Users,
+                title: "Community Support",
+                description: "Connect with other couples, share experiences, and learn from relationship experts.",
+              },
+              {
+                icon: Shield,
+                title: "Privacy First",
+                description: "Your relationship data is encrypted, secure, and never shared without your consent.",
+              },
+            ].map((feature, index) => (
+              <Card key={index} className="card-hover themed-card">
+                <CardContent className="p-6">
+                  <div className="feature-icon mb-4">
+                    <feature.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              {/* Supporting Text */}
-              <p
-                className="text-white/80 mb-6 sm:mb-8 max-w-xl mx-auto lg:mx-0"
-                style={{
-                  fontSize: "clamp(0.9rem, 2.5vw, 1.25rem)",
-                  lineHeight: "1.6",
-                }}
-              >
-                To know the feelings and handle the expectations of other people, enhancing both your professional and
-                private relationships.
-                <br />
-                <br />
-                Use our AlignSynch tool to uncover gaps in those Understandings and Expectations.
-              </p>
+      {/* How It Works */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">How It Works</Badge>
+            <h2 className="text-title mb-4">Simple steps to relationship transformation</h2>
+            <p className="text-subtle max-w-2xl mx-auto">
+              Get started in minutes and begin your journey toward deeper connection and understanding.
+            </p>
+          </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-center lg:items-start">
-                <Button
-                  size="lg"
-                  className="bg-blue-500/90 hover:bg-blue-500 border border-white/20 text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 px-6 sm:px-8 py-3 text-sm sm:text-base font-medium w-full sm:w-auto"
-                >
-                  <span className="hidden sm:inline">Relationship Demo Templates</span>
-                  <span className="sm:hidden">Demo Templates</span>
-                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                </Button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            {[
+              {
+                step: "1",
+                title: "Take the Assessment",
+                description:
+                  "Complete our comprehensive relationship assessment to understand your current dynamics and areas for growth.",
+              },
+              {
+                step: "2",
+                title: "Get Personalized Insights",
+                description:
+                  "Receive AI-powered insights, recommendations, and action plans tailored to your unique relationship.",
+              },
+              {
+                step: "3",
+                title: "Grow Together",
+                description:
+                  "Use guided exercises, track progress, and celebrate milestones as you build a stronger relationship.",
+              },
+            ].map((step, index) => (
+              <div key={index} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 0.2}s` }}>
+                <div className="step-number mx-auto mb-4">{step.step}</div>
+                <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
+                <p className="text-muted-foreground">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 px-6 sm:px-8 py-3 text-sm sm:text-base font-medium w-full sm:w-auto"
-                >
-                  <span className="hidden sm:inline">Watch an Aspect Alignment</span>
-                  <span className="sm:hidden">Watch Demo</span>
-                </Button>
+      {/* Benefits Section */}
+      <section className="py-20 gradient-bg">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">Benefits</Badge>
+              <h2 className="text-title mb-6">Why couples choose AlignSynch</h2>
+              <div className="space-y-4">
+                {[
+                  "Improve communication and reduce conflicts",
+                  "Discover shared values and life goals",
+                  "Build deeper emotional intimacy",
+                  "Create actionable relationship plans",
+                  "Track progress with detailed insights",
+                  "Access expert guidance and resources",
+                ].map((benefit, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="benefit-check mt-0.5">
+                      <CheckCircle className="w-3 h-3" />
+                    </div>
+                    <span className="text-foreground">{benefit}</span>
+                  </div>
+                ))}
               </div>
             </div>
-
-            {/* Right Column - Images */}
-            <div className="hidden lg:flex relative h-[400px] xl:h-[500px] w-full">
-              {/* Left Image - Woman studying (larger) */}
-              <div className="absolute left-0 top-0 w-[65%] h-[75%] z-10">
-                <Image
-                  src="/woman-studying.png"
-                  alt="Woman studying and taking notes"
-                  fill
-                  className="object-cover rounded-2xl xl:rounded-3xl shadow-2xl"
-                  sizes="(max-width: 1024px) 100vw, 65vw"
-                />
-              </div>
-
-              {/* Right Image - People meeting (smaller) */}
-              <div className="absolute right-0 bottom-0 w-[50%] h-[60%] z-20">
-                <Image
-                  src="/people-meeting.png"
-                  alt="Two people having a meeting"
-                  fill
-                  className="object-cover rounded-xl xl:rounded-2xl shadow-2xl"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                />
-              </div>
-            </div>
-
-            {/* Tablet Images - Side by side */}
-            <div className="hidden md:flex lg:hidden gap-4 mt-6">
-              <div className="relative h-48 w-full">
-                <Image
-                  src="/woman-studying.png"
-                  alt="Woman studying and taking notes"
-                  fill
-                  className="object-cover rounded-xl shadow-xl"
-                  sizes="50vw"
-                />
-              </div>
-              <div className="relative h-48 w-full">
-                <Image
-                  src="/people-meeting.png"
-                  alt="Two people having a meeting"
-                  fill
-                  className="object-cover rounded-xl shadow-xl"
-                  sizes="50vw"
-                />
-              </div>
-            </div>
-
-            {/* Mobile Images - Stacked vertically */}
-            <div className="md:hidden flex flex-col gap-4 mt-6">
-              <div className="relative h-48 sm:h-56 w-full">
-                <Image
-                  src="/woman-studying.png"
-                  alt="Woman studying and taking notes"
-                  fill
-                  className="object-cover rounded-xl shadow-xl"
-                  sizes="100vw"
-                />
-              </div>
-              <div className="relative h-40 sm:h-48 w-full">
-                <Image
-                  src="/people-meeting.png"
-                  alt="Two people having a meeting"
-                  fill
-                  className="object-cover rounded-xl shadow-xl"
-                  sizes="100vw"
-                />
+            <div className="relative">
+              <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-8 animate-float">
+                <div className="w-full h-full bg-card rounded-xl shadow-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse-glow">
+                      <Heart className="w-8 h-8 text-primary-foreground" />
+                    </div>
+                    <h3 className="text-lg font-semibold mb-2">Relationship Score</h3>
+                    <div className="text-3xl font-bold gradient-text">87%</div>
+                    <p className="text-sm text-muted-foreground">Strong & Growing</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </main>
+      </section>
 
-      {/* Subtle glow effects - Reverted to original */}
-      <div className="fixed inset-0 -z-5 pointer-events-none">
-        <div
-          className="absolute top-1/4 left-1/4 w-64 sm:w-80 lg:w-96 h-64 sm:h-80 lg:h-96 rounded-full opacity-10"
-          style={{
-            background: "radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%)",
-            filter: "blur(40px)",
-          }}
-        />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-64 sm:w-80 lg:w-96 h-64 sm:h-80 lg:h-96 rounded-full opacity-5"
-          style={{
-            background: "radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%)",
-            filter: "blur(60px)",
-          }}
-        />
-      </div>
+      {/* Final CTA */}
+      <section className="py-20 text-center">
+        <div className="container mx-auto px-4">
+          <h2 className="text-title mb-4">Ready to transform your relationship?</h2>
+          <p className="text-body text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Join thousands of couples who have already discovered the power of aligned relationships.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <Button className="cta-primary">
+                Get Started Free
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/contact">
+              <Button variant="outline" className="cta-secondary bg-transparent">
+                Talk to an Expert
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
