@@ -1,183 +1,187 @@
 # Vercel Environment Variables Setup Guide
 
-This guide will help you configure all necessary environment variables for the AlignSynch project deployment on Vercel.
+This guide will help you configure all necessary environment variables for deploying AlignSynch to Vercel.
 
-## Required Environment Variables
+## 🔧 Required Environment Variables
 
-### 1. NextAuth Configuration
+### NextAuth Configuration
 
-**NEXTAUTH_SECRET**
-- **Description**: Secret key for NextAuth.js session encryption
-- **Required**: Yes
-- **Format**: String (minimum 32 characters)
-- **Example**: `your-32-character-secret-key-here-minimum-length`
-- **Generation**: Run `openssl rand -base64 32` or use https://generate-secret.vercel.app/32
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `NEXTAUTH_SECRET` | 32+ character secret for session encryption | `your-32-character-secret-key-here` | ✅ |
+| `NEXTAUTH_URL` | Your application URL | `https://your-app.vercel.app` | ✅ |
 
-**NEXTAUTH_URL**
-- **Description**: Canonical URL of your site
-- **Required**: Yes (auto-detected on Vercel, but recommended to set)
-- **Format**: Full URL with protocol
-- **Production**: `https://your-domain.vercel.app`
-- **Preview**: `https://your-branch-name-git-branch-username.vercel.app`
+### Public Configuration
 
-### 2. Application Configuration
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `NEXT_PUBLIC_APP_URL` | Public URL for client-side usage | `https://your-app.vercel.app` | ✅ |
+| `NEXT_PUBLIC_VERSION` | Application version | `1.0.0` | ✅ |
 
-**NEXT_PUBLIC_APP_URL**
-- **Description**: Public URL for client-side usage
-- **Required**: Yes
-- **Format**: Full URL with protocol
-- **Production**: `https://your-domain.vercel.app`
-- **Preview**: `https://your-branch-name-git-branch-username.vercel.app`
+## 🔧 Optional Environment Variables
 
-**NEXT_PUBLIC_VERSION**
-- **Description**: Application version for display and tracking
-- **Required**: No (defaults to 1.0.0)
-- **Format**: Semantic version string
-- **Example**: `2.01.1`
+### Database Configuration
 
-## Optional Environment Variables
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host:5432/db` | ❌ |
 
-### 3. Database Configuration
+### Email Configuration
 
-**DATABASE_URL**
-- **Description**: PostgreSQL database connection string
-- **Required**: No (for basic functionality)
-- **Format**: `postgresql://username:password@host:port/database`
-- **Example**: `postgresql://user:pass@db.example.com:5432/alignsynch`
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `SMTP_HOST` | SMTP server hostname | `smtp.gmail.com` | ❌ |
+| `SMTP_PORT` | SMTP server port | `587` | ❌ |
+| `SMTP_USER` | SMTP username | `your-email@gmail.com` | ❌ |
+| `SMTP_PASSWORD` | SMTP password | `your-app-password` | ❌ |
+| `FROM_EMAIL` | From email address | `noreply@alignsynch.com` | ❌ |
 
-### 4. Email Configuration
+## 🚀 Setting Up in Vercel
 
-**SMTP_HOST**
-- **Description**: SMTP server hostname
-- **Required**: No (disables email features if not set)
-- **Example**: `smtp.gmail.com`
+### Step 1: Access Project Settings
 
-**SMTP_PORT**
-- **Description**: SMTP server port
-- **Required**: No
-- **Example**: `587`
+1. Go to your Vercel dashboard
+2. Select your AlignSynch project
+3. Click on the "Settings" tab
+4. Navigate to "Environment Variables"
 
-**SMTP_USER**
-- **Description**: SMTP authentication username
-- **Required**: No
-- **Example**: `your-email@gmail.com`
+### Step 2: Add Environment Variables
 
-**SMTP_PASSWORD**
-- **Description**: SMTP authentication password
-- **Required**: No
-- **Example**: `your-app-password`
+For each environment variable:
 
-**FROM_EMAIL**
-- **Description**: Default sender email address
-- **Required**: No
-- **Example**: `noreply@alignsynch.com`
+1. Click "Add New"
+2. Enter the variable name (e.g., `NEXTAUTH_SECRET`)
+3. Enter the variable value
+4. Select environments:
+   - **Production**: For live deployments
+   - **Preview**: For branch deployments
+   - **Development**: For local development
 
-## Setting Up Environment Variables
+### Step 3: Generate Required Values
 
-### In Vercel Dashboard
+#### NEXTAUTH_SECRET
+Generate a secure 32+ character secret:
 
-1. Go to your project in the Vercel dashboard
-2. Navigate to **Settings** → **Environment Variables**
-3. Add each variable with appropriate values for each environment:
-   - **Production**: Used for your main domain
-   - **Preview**: Used for branch deployments
-   - **Development**: Used for local development (optional)
+\`\`\`bash
+# Using OpenSSL
+openssl rand -base64 32
 
-### Environment-Specific Configuration
-
-#### Production Environment
-\`\`\`
-NEXTAUTH_SECRET=your-production-secret-32-chars-min
-NEXTAUTH_URL=https://alignsynch.com
-NEXT_PUBLIC_APP_URL=https://alignsynch.com
-NEXT_PUBLIC_VERSION=2.01.1
+# Using Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 \`\`\`
 
-#### Preview Environment
-\`\`\`
-NEXTAUTH_SECRET=your-preview-secret-32-chars-min
-NEXTAUTH_URL=https://alignsynch-git-main-username.vercel.app
-NEXT_PUBLIC_APP_URL=https://alignsynch-git-main-username.vercel.app
-NEXT_PUBLIC_VERSION=2.01.1-preview
-\`\`\`
+#### NEXTAUTH_URL
+Set to your Vercel deployment URL:
+- Production: `https://your-app.vercel.app`
+- Preview: `https://your-app-git-branch.vercel.app`
+- Development: `http://localhost:3000`
 
-## GitHub Secrets for CI/CD
-
-Add these secrets to your GitHub repository settings:
-
-1. Go to your GitHub repository
-2. Navigate to **Settings** → **Secrets and variables** → **Actions**
-3. Add the following repository secrets:
-
-**VERCEL_TOKEN**
-- Get from: https://vercel.com/account/tokens
-- Scope: Full Account access
-
-**VERCEL_ORG_ID**
-- Get from: Vercel project settings → General → Project ID section
-
-**VERCEL_PROJECT_ID**
-- Get from: Vercel project settings → General → Project ID section
-
-## Validation and Testing
+## 🔍 Environment Validation
 
 ### Health Check Endpoint
 
-After deployment, test your configuration:
-\`\`\`
-GET https://your-domain.vercel.app/api/health
-\`\`\`
+After deployment, visit `/api/health` to verify your configuration:
 
-This endpoint will return:
-- Environment validation status
-- Configuration check results
-- Missing or invalid variables
+\`\`\`json
+{
+  "status": "healthy",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "version": "1.0.0",
+  "environment": "production",
+  "checks": {
+    "nextauth": {
+      "configured": true,
+      "url": "https://your-app.vercel.app"
+    },
+    "database": {
+      "configured": false,
+      "connected": false
+    },
+    "email": {
+      "configured": false,
+      "host": "not configured"
+    }
+  }
+}
+\`\`\`
 
 ### Local Development
 
-1. Copy the example file:
-\`\`\`bash
-cp .env.example .env.local
-\`\`\`
+1. Copy the example environment file:
+   \`\`\`bash
+   cp .env.example .env.local
+   \`\`\`
 
 2. Fill in your local values in `.env.local`
 
 3. Test your configuration:
-\`\`\`bash
-pnpm env:check
-\`\`\`
+   \`\`\`bash
+   pnpm env:check
+   \`\`\`
 
-## Troubleshooting
+## 🔒 Security Best Practices
+
+### Environment-Specific Configuration
+
+- **Production**: Use secure, production-ready values
+- **Preview**: Use staging/test values
+- **Development**: Use local development values
+
+### Secret Management
+
+1. **Never commit secrets** to version control
+2. **Use strong, unique secrets** for each environment
+3. **Rotate secrets regularly** for production
+4. **Limit access** to environment variables
 
 ### Common Issues
 
-**Build fails with "NEXTAUTH_SECRET is required"**
-- Ensure NEXTAUTH_SECRET is set in all environments
-- Verify it's at least 32 characters long
+#### Build Failures
+- Ensure all required variables are set
+- Check variable names for typos
+- Verify URL formats are correct
 
-**"Invalid URL" errors**
-- Check that all URL variables include the protocol (https://)
-- Ensure no trailing slashes in URLs
+#### Authentication Issues
+- Confirm `NEXTAUTH_SECRET` is 32+ characters
+- Verify `NEXTAUTH_URL` matches your domain
+- Check that URLs don't have trailing slashes
 
-**Email features not working**
-- Verify all SMTP variables are set correctly
-- Test SMTP credentials with your email provider
+#### Email Issues
+- Verify SMTP credentials are correct
+- Check firewall/security settings
+- Test with a simple SMTP service first
 
-**Environment variables not updating**
-- Redeploy after changing environment variables
-- Clear Vercel's build cache if needed
+## 📋 Quick Setup Checklist
 
-### Getting Help
+- [ ] Set `NEXTAUTH_SECRET` (32+ characters)
+- [ ] Set `NEXTAUTH_URL` (your domain)
+- [ ] Set `NEXT_PUBLIC_APP_URL` (your domain)
+- [ ] Set `NEXT_PUBLIC_VERSION` (your version)
+- [ ] Configure database URL (if using database)
+- [ ] Configure email settings (if using email)
+- [ ] Test with `/api/health` endpoint
+- [ ] Verify authentication works
+- [ ] Test all application features
 
-1. Check the health endpoint: `/api/health`
-2. Review Vercel deployment logs
-3. Verify environment variables in Vercel dashboard
-4. Test locally with `.env.local` file
+## 🆘 Troubleshooting
 
-## Security Best Practices
+### Environment Variable Not Found
 
-1. **Never commit `.env.local`** to version control
-2. **Use different secrets** for production and preview environments
-3. **Rotate secrets regularly**, especially NEXTAUTH_SECRET
-4. **Use Vercel's encrypted environment variables** for sensitive data
-5. **Limit access** to environment variables in team settings
+1. Check spelling and case sensitivity
+2. Verify the variable is set in the correct environment
+3. Redeploy after adding new variables
+
+### Invalid URL Format
+
+Ensure URLs:
+- Start with `http://` or `https://`
+- Don't have trailing slashes
+- Use correct domain names
+
+### Authentication Errors
+
+1. Verify `NEXTAUTH_SECRET` is set and long enough
+2. Check `NEXTAUTH_URL` matches your deployment URL
+3. Ensure no trailing slashes in URLs
+
+For additional help, check the health endpoint or contact support.

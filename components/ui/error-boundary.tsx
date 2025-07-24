@@ -1,9 +1,9 @@
 "use client"
 
 import React from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { AlertTriangle, RefreshCw } from "lucide-react"
+import { AlertTriangle } from "lucide-react"
+import { Button } from "./button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./card"
 
 interface ErrorBoundaryState {
   hasError: boolean
@@ -26,7 +26,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("Error caught by boundary:", error, errorInfo)
+    console.error("ErrorBoundary caught an error:", error, errorInfo)
   }
 
   resetError = () => {
@@ -43,24 +43,25 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       return (
         <div className="flex items-center justify-center min-h-[400px] p-4">
           <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                <AlertTriangle className="h-6 w-6 text-red-600" />
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                <CardTitle>Something went wrong</CardTitle>
               </div>
-              <CardTitle>Something went wrong</CardTitle>
-              <CardDescription>An error occurred while rendering this component. Please try again.</CardDescription>
+              <CardDescription>An unexpected error occurred. Please try refreshing the page.</CardDescription>
             </CardHeader>
-            <CardContent className="text-center">
-              <Button onClick={this.resetError} className="gap-2">
-                <RefreshCw className="h-4 w-4" />
-                Try Again
-              </Button>
-              {process.env.NODE_ENV === "development" && this.state.error && (
-                <details className="mt-4 text-left">
-                  <summary className="cursor-pointer text-sm font-medium">Error Details</summary>
-                  <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">{this.state.error.stack}</pre>
-                </details>
-              )}
+            <CardContent>
+              <div className="space-y-4">
+                {this.state.error && (
+                  <details className="text-sm">
+                    <summary className="cursor-pointer font-medium">Error details</summary>
+                    <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">{this.state.error.message}</pre>
+                  </details>
+                )}
+                <Button onClick={this.resetError} className="w-full">
+                  Try again
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import { Loader2 } from "lucide-react"
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg"
@@ -12,15 +13,5 @@ export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) 
     lg: "h-8 w-8",
   }
 
-  return (
-    <div
-      className={cn(
-        "animate-spin rounded-full border-2 border-current border-t-transparent",
-        sizeClasses[size],
-        className,
-      )}
-    >
-      <span className="sr-only">Loading...</span>
-    </div>
-  )
+  return <Loader2 className={cn("animate-spin", sizeClasses[size], className)} />
 }
