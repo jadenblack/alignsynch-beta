@@ -1,66 +1,22 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { signIn, getSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { Eye, EyeOff, AlertCircle, User, Users, UserCheck, GraduationCap } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { DEV_CREDENTIALS } from "@/lib/auth"
-
-const isProduction = process.env.NODE_ENV === "production"
+import { Heart, User, Shield, Settings } from "lucide-react"
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleDevLogin = async (role: keyof typeof DEV_CREDENTIALS) => {
     setIsLoading(true)
-    setError("")
-
-    try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        setError("Invalid credentials. Please try again.")
-      } else {
-        // Check if user has admin access
-        const session = await getSession()
-        if (session?.user?.role === "admin") {
-          router.push("/admin/dashboard")
-        } else {
-          router.push("/dashboard")
-        }
-      }
-    } catch (error) {
-      setError("An error occurred. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleQuickLogin = async (role: keyof typeof DEV_CREDENTIALS) => {
     const credentials = DEV_CREDENTIALS[role]
-    setEmail(credentials.email)
-    setPassword(credentials.password)
-    setError("")
 
-    setIsLoading(true)
     try {
       const result = await signIn("credentials", {
         email: credentials.email,
@@ -68,151 +24,98 @@ export default function SignInPage() {
         redirect: false,
       })
 
-      if (result?.error) {
-        setError("Quick login failed. Please try again.")
-      } else {
+      if (result?.ok) {
         const session = await getSession()
-        if (session?.user?.role === "admin") {
-          router.push("/admin/dashboard")
-        } else {
-          router.push("/dashboard")
-        }
+        router.push("/dashboard")
+      } else {
+        console.error("Sign in failed")
       }
     } catch (error) {
-      setError("An error occurred during quick login.")
+      console.error("Sign in error:", error)
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
-          <CardDescription className="text-center">Enter your credentials to access your dashboard</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <div className="flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
+              <Heart className="w-6 h-6 text-white" />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  Signing in...
-                </>
-              ) : (
-                "Sign In"
-              )}
-            </Button>
-          </form>
-
-          {/* Quick Login Buttons - Only show in non-production */}
-          {!isProduction && (
-            <div className="mt-6 space-y-3">
-              <div className="text-center text-sm font-medium text-muted-foreground">
-                Quick Login (Development Only)
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickLogin("admin")}
-                  disabled={isLoading}
-                  className="flex items-center gap-1"
-                >
-                  <User className="h-3 w-3" />
-                  Admin
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickLogin("initiator")}
-                  disabled={isLoading}
-                  className="flex items-center gap-1"
-                >
-                  <Users className="h-3 w-3" />
-                  Initiator
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickLogin("counterparty")}
-                  disabled={isLoading}
-                  className="flex items-center gap-1"
-                >
-                  <UserCheck className="h-3 w-3" />
-                  CounterParty
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleQuickLogin("coach")}
-                  disabled={isLoading}
-                  className="flex items-center gap-1"
-                >
-                  <GraduationCap className="h-3 w-3" />
-                  Coach
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Demo Credentials:</p>
-            <p>Email: admin@alignsynch.com</p>
-            <p>Password: password</p>
           </div>
-        </CardContent>
-      </Card>
+          <h1 className="text-2xl font-bold text-slate-900">Welcome to AlignSynch</h1>
+          <p className="text-slate-600 mt-2">Sign in to access your dashboard</p>
+        </div>
+
+        {/* Development Login Options */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Development Login</CardTitle>
+            <CardDescription>Quick access for testing different user roles</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button
+              onClick={() => handleDevLogin("admin")}
+              disabled={isLoading}
+              className="w-full justify-start bg-red-600 hover:bg-red-700"
+            >
+              <Shield className="w-4 h-4 mr-2" />
+              Sign in as Admin
+              <Badge variant="secondary" className="ml-auto">
+                Full Access
+              </Badge>
+            </Button>
+
+            <Button
+              onClick={() => handleDevLogin("moderator")}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Sign in as Moderator
+              <Badge variant="outline" className="ml-auto">
+                Content Management
+              </Badge>
+            </Button>
+
+            <Button
+              onClick={() => handleDevLogin("user")}
+              disabled={isLoading}
+              variant="outline"
+              className="w-full justify-start"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Sign in as User
+              <Badge variant="outline" className="ml-auto">
+                Standard Access
+              </Badge>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Credentials Info */}
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="pt-6">
+            <h3 className="font-semibold text-blue-900 mb-2">Development Credentials</h3>
+            <div className="space-y-2 text-sm text-blue-800">
+              <div>
+                <strong>Admin:</strong> admin@alignsynch.com / admin123
+              </div>
+              <div>
+                <strong>Moderator:</strong> mod@alignsynch.com / mod123
+              </div>
+              <div>
+                <strong>User:</strong> user@alignsynch.com / user123
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

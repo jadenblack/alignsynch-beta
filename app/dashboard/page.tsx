@@ -1,186 +1,144 @@
 "use client"
-import Link from "next/link"
+
+import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { mockRelationshipData } from "@/lib/relationship-data"
-import { Heart, Target, MessageCircle, Calendar, Check, Zap, ArrowRight, Clock } from "lucide-react"
+import { Heart, Users, Target, TrendingUp, Settings, LogOut } from "lucide-react"
+import { signOut } from "next-auth/react"
+import Link from "next/link"
 
 export default function DashboardPage() {
-  const { partner, connectionScore, alignmentHistory, upcomingCheckIn, sharedGoals, strengths, growthAreas } =
-    mockRelationshipData
+  const { data: session } = useSession()
+
+  if (!session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Card>
+          <CardContent className="pt-6">
+            <p>Please sign in to access the dashboard.</p>
+            <Link href="/auth/signin">
+              <Button className="mt-4">Sign In</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="container mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Relationship Dashboard</h1>
-            <p className="text-muted-foreground">Your shared space for connection and growth with {partner.name}.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Header */}
+      <header className="border-b bg-white/80 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
+              <Heart className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-900">AlignSynch Dashboard</h1>
           </div>
-          <Link href="/session/new">
-            <Button className="mt-4 md:mt-0 gap-2">
-              <Zap className="w-4 h-4" />
-              Start New Session
+          <div className="flex items-center space-x-4">
+            <Badge variant="outline" className="capitalize">
+              {(session.user as any)?.role || "user"}
+            </Badge>
+            <span className="text-sm text-slate-600">Welcome, {session.user?.name}</span>
+            <Button variant="outline" size="sm" onClick={() => signOut()}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
             </Button>
-          </Link>
+          </div>
         </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Connection Score */}
-            <Card className="bg-gradient-to-br from-primary/90 to-primary text-primary-foreground">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart />
-                  Connection Score
-                </CardTitle>
-                <CardDescription className="text-primary-foreground/80">
-                  A snapshot of your overall alignment and connection.
-                </CardDescription>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid gap-6">
+          {/* Welcome Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Welcome to Your Dashboard</CardTitle>
+              <CardDescription>Manage your relationships and track your alignment progress</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-teal-100 rounded-full flex items-center justify-center">
+                  <Heart className="w-8 h-8 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">Your Alignment Score</h3>
+                  <Progress value={85} className="w-48 mt-2" />
+                  <p className="text-sm text-slate-600 mt-1">85% - Excellent progress!</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Stats Grid */}
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Relationships</CardTitle>
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="flex items-baseline gap-4">
-                  <div className="text-6xl font-bold">{connectionScore}</div>
-                  <div className="text-2xl font-medium">/ 100</div>
-                </div>
-                <Progress value={connectionScore} className="mt-4 h-3 [&>div]:bg-white" />
+                <div className="text-2xl font-bold">3</div>
+                <p className="text-xs text-muted-foreground">+1 from last month</p>
               </CardContent>
             </Card>
 
-            {/* Upcoming Check-in */}
-            {upcomingCheckIn && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="text-primary" />
-                    Upcoming Check-in
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{upcomingCheckIn.focusArea}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Scheduled for {new Date(upcomingCheckIn.date).toLocaleDateString("en-US", { weekday: "long" })}
-                    </p>
-                  </div>
-                  <Link href={`/session/new?area=${upcomingCheckIn.focusArea.toLowerCase().replace(" ", "-")}`}>
-                    <Button variant="outline">Start Now</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Shared Goals */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target />
-                  Shared Goals
-                </CardTitle>
-                <CardDescription>Your collective aspirations and dreams.</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Goals Aligned</CardTitle>
+                <Target className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
-              <CardContent className="space-y-4">
-                {sharedGoals.map((goal) => (
-                  <div key={goal.title} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{goal.title}</p>
-                      <p className="text-sm text-muted-foreground">Target: {goal.targetDate}</p>
-                    </div>
-                    <Badge variant={goal.status === "completed" ? "default" : "outline"}>
-                      {goal.status === "completed" ? (
-                        <Check className="w-3 h-3 mr-1" />
-                      ) : (
-                        <Clock className="w-3 h-3 mr-1" />
-                      )}
-                      {goal.status}
-                    </Badge>
-                  </div>
-                ))}
+              <CardContent>
+                <div className="text-2xl font-bold">12</div>
+                <p className="text-xs text-muted-foreground">+3 this week</p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Progress Score</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">85%</div>
+                <p className="text-xs text-muted-foreground">+5% from last week</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-8">
-            {/* Partner Card */}
-            <Card>
-              <CardContent className="p-6 flex items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={partner.avatar || "/placeholder.svg"} />
-                  <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm text-muted-foreground">Your Partner</p>
-                  <p className="font-semibold text-lg">{partner.name}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Strengths & Growth */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Our Dynamics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4">
-                  <h4 className="font-medium mb-2 text-green-600">Strengths</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {strengths.map((strength) => (
-                      <Badge key={strength} variant="secondary" className="bg-green-100 text-green-800">
-                        {strength}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-medium mb-2 text-amber-600">Growth Areas</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {growthAreas.map((area) => (
-                      <Badge key={area} variant="secondary" className="bg-amber-100 text-amber-800">
-                        {area}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Alignment History */}
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <MessageCircle />
-                    Recent Sessions
-                  </CardTitle>
-                  <Link href="/our-journey">
-                    <Button variant="ghost" size="sm" className="gap-1">
-                      View All
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {alignmentHistory.slice(0, 3).map((session) => (
-                  <div key={session.date} className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="font-medium">{session.focusArea}</p>
-                      <p className="text-xs text-muted-foreground">{new Date(session.date).toLocaleDateString()}</p>
-                    </div>
-                    <div className="font-semibold">{session.score}%</div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Common tasks and navigation</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Button variant="outline" className="h-20 flex-col bg-transparent">
+                  <Users className="w-6 h-6 mb-2" />
+                  <span>Relationships</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col bg-transparent">
+                  <Target className="w-6 h-6 mb-2" />
+                  <span>Goals</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col bg-transparent">
+                  <TrendingUp className="w-6 h-6 mb-2" />
+                  <span>Progress</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex-col bg-transparent">
+                  <Settings className="w-6 h-6 mb-2" />
+                  <span>Settings</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

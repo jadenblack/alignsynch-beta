@@ -10,7 +10,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['placeholder.svg'],
+    domains: ['localhost'],
     unoptimized: true,
   },
   env: {
