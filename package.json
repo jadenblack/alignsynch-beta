@@ -1,6 +1,6 @@
 {
   "name": "alignsynch-beta",
-  "version": "2.01.1",
+  "version": "2.0.1",
   "private": true,
   "scripts": {
     "build": "next build",
