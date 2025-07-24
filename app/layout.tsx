@@ -5,15 +5,47 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SiteFooter } from "@/components/layout/site-footer"
-import Providers from "./providers"
+import { Providers } from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "AlignSynch - Relationship Alignment Platform",
-  description: "A comprehensive platform for relationship alignment and communication",
-  icons: {
-    icon: "/favicon.ico",
+  title: "AlignSynch - Transform Your Relationships",
+  description: "AI-powered relationship alignment platform for deeper connections and stronger partnerships.",
+  keywords: ["relationships", "AI", "alignment", "communication", "couples"],
+  authors: [{ name: "AlignSynch Team" }],
+  creator: "AlignSynch",
+  publisher: "AlignSynch",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://alignsynch.vercel.app"),
+  openGraph: {
+    title: "AlignSynch - Transform Your Relationships",
+    description: "AI-powered relationship alignment platform for deeper connections and stronger partnerships.",
+    url: "/",
+    siteName: "AlignSynch",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AlignSynch - Transform Your Relationships",
+    description: "AI-powered relationship alignment platform for deeper connections and stronger partnerships.",
+    creator: "@alignsynch",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
     generator: 'v0.dev'
 }
