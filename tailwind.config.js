@@ -8,7 +8,6 @@ module.exports = {
     "./src/**/*.{ts,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -25,7 +24,7 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#0fc2f0",
+          DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
@@ -41,7 +40,7 @@ module.exports = {
           foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#0fc2f0",
+          DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
@@ -60,47 +59,17 @@ module.exports = {
       },
       keyframes: {
         "accordion-down": {
-          from: { height: "0" },
+          from: { height: 0 },
           to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
-          to: { height: "0" },
-        },
-        "gentle-bounce": {
-          "0%, 100%": { transform: "translateY(0) rotate(6deg)" },
-          "50%": { transform: "translateY(-10px) rotate(6deg)" },
-        },
-        "warm-pulse": {
-          "0%, 100%": { transform: "scale(1) rotate(-3deg)", opacity: "1" },
-          "50%": { transform: "scale(1.05) rotate(-3deg)", opacity: "0.9" },
-        },
-        "connection-flow": {
-          "0%, 100%": { transform: "scale(1)", opacity: "0.3" },
-          "50%": { transform: "scale(1.2)", opacity: "0.6" },
-        },
-        "fade-in-up": {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        float: {
-          "0%, 100%": { transform: "translateY(0px)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
-        "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 20px rgba(15, 194, 240, 0.3)" },
-          "50%": { boxShadow: "0 0 30px rgba(15, 194, 240, 0.6)" },
+          to: { height: 0 },
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "gentle-bounce": "gentle-bounce 3s ease-in-out infinite",
-        "warm-pulse": "warm-pulse 4s ease-in-out infinite",
-        "connection-flow": "connection-flow 6s ease-in-out infinite",
-        "fade-in-up": "fade-in-up 0.6s ease-out",
-        float: "float 3s ease-in-out infinite",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },

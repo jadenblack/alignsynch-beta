@@ -12,48 +12,80 @@ export interface ExtendedUser {
   image?: string
 }
 
-// Mock user database
+// Role-based permissions mapping
+export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
+  admin: [
+    "users.read",
+    "users.write",
+    "users.delete",
+    "content.read",
+    "content.write",
+    "content.delete",
+    "settings.read",
+    "settings.write",
+    "analytics.read",
+    "reports.read",
+    "admin.access",
+  ],
+  manager: ["users.read", "users.write", "content.read", "content.write", "analytics.read", "reports.read"],
+  user: ["content.read", "content.write", "analytics.read"],
+  viewer: ["content.read", "analytics.read"],
+  initiator: ["sessions.create", "sessions.read", "profile.write", "content.read", "content.write"],
+  counterparty: ["sessions.read", "sessions.respond", "profile.write", "content.read"],
+  coach: ["sessions.read", "sessions.guide", "insights.create", "analytics.read", "reports.read"],
+}
+
+// Mock user database - replace with real database
 const users: ExtendedUser[] = [
   {
     id: "1",
-    name: "Admin User",
     email: "admin@alignsynch.com",
+    name: "Admin User",
     role: "admin",
-    permissions: ["users.read", "users.write", "users.delete", "admin.access"],
+    permissions: ROLE_PERMISSIONS.admin,
     image: "/placeholder.svg?height=40&width=40",
   },
   {
     id: "2",
-    name: "Relationship Initiator",
-    email: "initiator@alignsynch.com",
-    role: "initiator",
-    permissions: ["sessions.create", "sessions.read", "profile.write"],
+    email: "manager@alignsynch.com",
+    name: "Manager User",
+    role: "manager",
+    permissions: ROLE_PERMISSIONS.manager,
     image: "/placeholder.svg?height=40&width=40",
   },
   {
     id: "3",
-    name: "Relationship Partner",
-    email: "partner@alignsynch.com",
-    role: "counterparty",
-    permissions: ["sessions.read", "sessions.respond", "profile.write"],
+    email: "initiator@alignsynch.com",
+    name: "Sarah Johnson",
+    role: "initiator",
+    permissions: ROLE_PERMISSIONS.initiator,
     image: "/placeholder.svg?height=40&width=40",
   },
   {
     id: "4",
-    name: "Relationship Coach",
+    email: "counterparty@alignsynch.com",
+    name: "Michael Chen",
+    role: "counterparty",
+    permissions: ROLE_PERMISSIONS.counterparty,
+    image: "/placeholder.svg?height=40&width=40",
+  },
+  {
+    id: "5",
     email: "coach@alignsynch.com",
+    name: "Dr. Emily Rodriguez",
     role: "coach",
-    permissions: ["sessions.read", "sessions.guide", "insights.create"],
+    permissions: ROLE_PERMISSIONS.coach,
     image: "/placeholder.svg?height=40&width=40",
   },
 ]
 
-// Development credentials for quick login
+// Quick login credentials for development
 export const DEV_CREDENTIALS = {
-  admin: { email: "admin@alignsynch.com", password: "password" },
-  initiator: { email: "initiator@alignsynch.com", password: "password" },
-  counterparty: { email: "partner@alignsynch.com", password: "password" },
-  coach: { email: "coach@alignsynch.com", password: "password" },
+  admin: { email: "admin@alignsynch.com", password: "password", name: "Admin User" },
+  initiator: { email: "initiator@alignsynch.com", password: "password", name: "Sarah Johnson" },
+  counterparty: { email: "counterparty@alignsynch.com", password: "password", name: "Michael Chen" },
+  coach: { email: "coach@alignsynch.com", password: "password", name: "Dr. Emily Rodriguez" },
+  manager: { email: "manager@alignsynch.com", password: "password", name: "Manager User" },
 }
 
 export const authOptions: NextAuthOptions = {
@@ -69,53 +101,73 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        // Find user by email
+        // Mock authentication - replace with real authentication
         const user = users.find((u) => u.email === credentials.email)
-
-        if (!user) {
-          return null
+        if (user && credentials.password === "password") {
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            permissions: user.permissions,
+            image: user.image,
+          }
         }
-
-        // Simple password check (in production, use proper hashing)
-        if (credentials.password !== "password") {
-          return null
-        }
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          permissions: user.permissions,
-          image: user.image,
-        }
+        return null
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as ExtendedUser).role
-        token.permissions = (user as ExtendedUser).permissions
+        token.role = (user as any).role
+        token.permissions = (user as any).permissions
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
-        ;(session.user as ExtendedUser).role = token.role as UserRole
-        ;(session.user as ExtendedUser).permissions = token.permissions as string[]
+      if (token) {
+        session.user.id = token.sub!
+        ;(session.user as any).role = token.role as UserRole
+        ;(session.user as any).permissions = token.permissions as string[]
       }
       return session
     },
   },
   pages: {
     signIn: "/auth/signin",
+    error: "/auth/error",
   },
   session: {
     strategy: "jwt",
   },
 }
 
+// Permission checking utilities
 export function hasPermission(userPermissions: string[], requiredPermission: string): boolean {
   return userPermissions.includes(requiredPermission) || userPermissions.includes("admin.access")
+}
+
+export function hasAnyPermission(userPermissions: string[], requiredPermissions: string[]): boolean {
+  return (
+    requiredPermissions.some((permission) => userPermissions.includes(permission)) ||
+    userPermissions.includes("admin.access")
+  )
+}
+
+export function hasAllPermissions(userPermissions: string[], requiredPermissions: string[]): boolean {
+  return (
+    requiredPermissions.every((permission) => userPermissions.includes(permission)) ||
+    userPermissions.includes("admin.access")
+  )
+}
+
+// Get user by email utility
+export function getUserByEmail(email: string): ExtendedUser | undefined {
+  return users.find((user) => user.email === email)
+}
+
+// Get user by role utility
+export function getUsersByRole(role: UserRole): ExtendedUser[] {
+  return users.filter((user) => user.role === role)
 }

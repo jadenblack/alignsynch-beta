@@ -9,15 +9,17 @@ const envSchema = z.object({
 export function validateEnv() {
   try {
     const env = envSchema.parse(process.env)
-    console.log("✅ Environment validation passed")
-    return env
+    return { success: true, data: env }
   } catch (error) {
-    console.error("❌ Environment validation failed:", error)
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Invalid environment configuration")
+    console.warn("Environment validation failed:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+      data: {
+        NODE_ENV: process.env.NODE_ENV || "development",
+        NEXTAUTH_URL: process.env.NEXTAUTH_URL || "",
+        NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "",
+      },
     }
-    return process.env
   }
 }
-
-export const env = validateEnv()

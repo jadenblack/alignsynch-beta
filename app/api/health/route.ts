@@ -5,15 +5,15 @@ export async function GET() {
     return NextResponse.json({
       status: "healthy",
       timestamp: new Date().toISOString(),
-      version: "2.0.1",
       environment: process.env.NODE_ENV || "development",
+      version: "2.0.1",
     })
   } catch (error) {
     return NextResponse.json(
       {
         status: "error",
         message: "Health check failed",
-        error: error instanceof Error ? error.message : "Unknown error",
+        timestamp: new Date().toISOString(),
       },
       { status: 500 },
     )
