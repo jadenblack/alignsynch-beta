@@ -17,28 +17,19 @@ export function SiteFooter() {
             </Link>{" "}
             and{" "}
             <Link
-              href="https://vercel.com"
+              href="https://tailwindcss.com"
               target="_blank"
               rel="noreferrer"
               className="font-medium underline underline-offset-4"
             >
-              Vercel
-            </Link>
-            . The source code is available on{" "}
-            <Link
-              href="https://github.com/jadenblack/alignsynch-beta"
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium underline underline-offset-4"
-            >
-              GitHub
+              Tailwind CSS
             </Link>
             .
           </p>
         </div>
-        <div className="flex items-center space-x-4">
-          <p className="text-sm text-muted-foreground">© 2024 AlignSynch Beta. All rights reserved.</p>
-        </div>
+        <p className="text-center text-sm text-muted-foreground md:text-left">
+          © 2024 AlignSynch Beta. All rights reserved.
+        </p>
       </div>
     </footer>
   )

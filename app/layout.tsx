@@ -3,61 +3,15 @@ import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Providers } from "./providers"
 import { SiteHeader } from "@/components/layout/site-header"
 import { SiteFooter } from "@/components/layout/site-footer"
+import { Providers } from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "AlignSynch Beta - Relationship Alignment Platform",
-  description: "A comprehensive platform for relationship alignment and synchronization",
-  keywords: ["relationships", "alignment", "communication", "couples", "therapy"],
-  authors: [{ name: "AlignSynch Team" }],
-  creator: "AlignSynch",
-  publisher: "AlignSynch",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
-  openGraph: {
-    title: "AlignSynch Beta - Relationship Alignment Platform",
-    description: "A comprehensive platform for relationship alignment and synchronization",
-    url: process.env.NEXTAUTH_URL || "http://localhost:3000",
-    siteName: "AlignSynch Beta",
-    images: [
-      {
-        url: "/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "AlignSynch Beta",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "AlignSynch Beta - Relationship Alignment Platform",
-    description: "A comprehensive platform for relationship alignment and synchronization",
-    images: ["/logo.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  verification: {
-    google: "your-google-verification-code",
-  },
+  title: "AlignSynch Beta",
+  description: "A comprehensive platform for alignment and synchronization",
     generator: 'v0.dev'
 }
 
