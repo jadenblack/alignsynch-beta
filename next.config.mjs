@@ -9,7 +9,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['blob.vercel-storage.com', 'public.blob.vercel-storage.com'],
+    domains: ['blob.vercel-storage.com', 'public.blob.vercel-storage.com', 'localhost'],
     unoptimized: true,
   },
 };

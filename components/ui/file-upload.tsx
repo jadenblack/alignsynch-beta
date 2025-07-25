@@ -1,188 +1,156 @@
 "use client"
 
-import type React from "react"
-import { useState, useCallback } from "react"
-import { useSession } from "next-auth/react"
+import { useState, useCallback, useRef } from "react"
+import { useDropzone } from "react-dropzone"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
-import { UploadCloud, FileText, ImageIcon, XCircle } from "lucide-react"
+import { CloudUpload, FileText, XCircle, CircleCheck } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-export function FileUpload() {
-  const { data: session } = useSession()
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
+interface FileUploadProps {
+  onUploadSuccess?: (url: string, pathname: string) => void
+  onUploadError?: (error: string) => void
+  maxFileSizeMb?: number
+  acceptedFileTypes?: string[]
+}
+
+export function FileUpload({
+  onUploadSuccess,
+  onUploadError,
+  maxFileSizeMb = 10, // Default max file size to 10MB
+  acceptedFileTypes = ["image/*", "application/pdf"], // Default accepted types
+}: FileUploadProps) {
+  const [files, setFiles] = useState<File[]>([])
+  const [uploadProgress, setUploadProgress] = useState<number>(0)
   const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0]
-      validateAndSetFile(file)
-    }
-  }
-
-  const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault()
-    if (event.dataTransfer.files && event.dataTransfer.files[0]) {
-      const file = event.dataTransfer.files[0]
-      validateAndSetFile(file)
-    }
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    setFiles(acceptedFiles)
+    setUploadStatus("idle")
+    setUploadProgress(0)
   }, [])
 
-  const validateAndSetFile = (file: File) => {
-    const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-    const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"]
-
-    if (file.size > MAX_FILE_SIZE) {
-      setErrorMessage("File size exceeds 10MB limit.")
-      setSelectedFile(null)
-      return
-    }
-
-    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-      setErrorMessage("Unsupported file type. Only JPG, PNG, and PDF are allowed.")
-      setSelectedFile(null)
-      return
-    }
-
-    setSelectedFile(file)
-    setUploadStatus("idle")
-    setErrorMessage(null)
-    setUploadProgress(0)
-    setUploadedUrl(null)
-  }
+  const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    maxSize: maxFileSizeMb * 1024 * 1024, // Convert MB to bytes
+    accept: acceptedFileTypes.reduce((acc, type) => ({ ...acc, [type]: [] }), {}),
+  })
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      setErrorMessage("Please select a file first.")
-      return
-    }
-    if (!session) {
-      setErrorMessage("You must be logged in to upload files.")
+    if (files.length === 0) {
+      onUploadError?.("No file selected for upload.")
       return
     }
 
+    const file = files[0]
     setUploadStatus("uploading")
     setUploadProgress(0)
-    setErrorMessage(null)
-
-    const formData = new FormData()
-    formData.append("file", selectedFile)
+    abortControllerRef.current = new AbortController()
+    const signal = abortControllerRef.current.signal
 
     try {
-      const xhr = new XMLHttpRequest()
-      xhr.open("POST", "/api/upload", true)
+      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: "POST",
+        body: file,
+        signal,
+      })
 
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentCompleted = Math.round((event.loaded * 100) / event.total)
-          setUploadProgress(percentCompleted)
-        }
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "File upload failed")
       }
 
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          const response = JSON.parse(xhr.responseText)
-          setUploadStatus("success")
-          setUploadedUrl(response.url)
-          console.log("File uploaded successfully:", response.url)
-        } else {
-          const errorResponse = JSON.parse(xhr.responseText)
-          setUploadStatus("error")
-          setErrorMessage(errorResponse.error || "Upload failed.")
-          console.error("Upload failed:", errorResponse.error)
-        }
-      }
-
-      xhr.onerror = () => {
+      const data = await response.json()
+      setUploadProgress(100)
+      setUploadStatus("success")
+      onUploadSuccess?.(data.url, data.pathname)
+    } catch (error: any) {
+      if (error.name === "AbortError") {
+        console.log("Upload aborted")
+        setUploadStatus("idle") // Reset status if aborted
+      } else {
+        console.error("Upload error:", error)
         setUploadStatus("error")
-        setErrorMessage("Network error or server unreachable.")
-        console.error("XHR error during upload.")
+        onUploadError?.(error.message || "An unknown error occurred during upload.")
       }
-
-      xhr.send(formData)
-    } catch (error) {
-      setUploadStatus("error")
-      setErrorMessage("An unexpected error occurred during upload.")
-      console.error("Unexpected error:", error)
+    } finally {
+      abortControllerRef.current = null
     }
   }
 
-  const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith("image/")) {
-      return <ImageIcon className="h-8 w-8 text-gray-500" />
+  const handleCancelUpload = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
     }
-    if (fileType === "application/pdf") {
-      return <FileText className="h-8 w-8 text-red-500" />
-    }
-    return <FileText className="h-8 w-8 text-gray-500" />
+    setFiles([])
+    setUploadStatus("idle")
+    setUploadProgress(0)
   }
+
+  const displayFileName = files.length > 0 ? files[0].name : "No file selected"
 
   return (
-    <Card className="w-full max-w-lg mx-auto p-6 border-2 border-dashed border-gray-300 bg-gray-50">
-      <CardContent className="flex flex-col items-center justify-center p-0">
+    <Card className="w-full p-4">
+      <CardContent className="flex flex-col items-center justify-center space-y-4">
         <div
-          onDrop={handleDrop}
-          onDragOver={(e) => e.preventDefault()}
-          className="flex flex-col items-center justify-center w-full p-8 text-center cursor-pointer"
+          {...getRootProps()}
+          className={cn(
+            "flex flex-col items-center justify-center w-full p-6 border-2 border-dashed rounded-lg cursor-pointer",
+            isDragActive ? "border-primary-default bg-primary-default/10" : "border-gray-300 bg-gray-50",
+            fileRejections.length > 0 && "border-destructive-default bg-destructive-default/10",
+          )}
         >
-          <UploadCloud className="h-12 w-12 text-gray-400 mb-4" />
-          <p className="text-gray-600 mb-2">Drag & drop your file here, or</p>
-          <input
-            id="file-upload"
-            type="file"
-            className="hidden"
-            onChange={handleFileChange}
-            accept="image/jpeg,image/png,application/pdf"
-          />
-          <label htmlFor="file-upload" className="cursor-pointer">
-            <Button variant="outline" type="button">
-              Browse Files
-            </Button>
-          </label>
+          <input {...getInputProps()} />
+          <CloudUpload className="h-12 w-12 text-gray-400 mb-3" />
+          {isDragActive ? (
+            <p className="text-gray-600">Drop the files here ...</p>
+          ) : (
+            <p className="text-gray-600 text-center">
+              Drag 'n' drop a file here, or <span className="text-primary-default font-medium">click to select</span>
+            </p>
+          )}
+          <p className="text-sm text-gray-500 mt-1">
+            (Max {maxFileSizeMb}MB, accepted: {acceptedFileTypes.map((type) => type.split("/")[1] || type).join(", ")})
+          </p>
         </div>
 
-        {selectedFile && (
-          <div className="w-full p-4 border-t border-gray-200 bg-white flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {getFileIcon(selectedFile.type)}
-              <div>
-                <p className="text-sm font-medium text-gray-800">{selectedFile.name}</p>
-                <p className="text-xs text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-              </div>
+        {fileRejections.length > 0 && (
+          <div className="text-destructive-default text-sm text-center">
+            {fileRejections[0].errors.map((e, index) => (
+              <p key={index}>{e.message}</p>
+            ))}
+          </div>
+        )}
+
+        {files.length > 0 && (
+          <div className="w-full space-y-2">
+            <div className="flex items-center justify-between text-sm text-gray-700">
+              <span className="flex items-center gap-2">
+                <FileText className="h-4 w-4" /> {displayFileName}
+              </span>
+              {uploadStatus === "success" && <CircleCheck className="h-5 w-5 text-green-500" />}
+              {uploadStatus === "error" && <XCircle className="h-5 w-5 text-destructive-default" />}
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setSelectedFile(null)}>
-              <XCircle className="h-5 w-5 text-gray-500" />
-            </Button>
+            {uploadStatus === "uploading" && <Progress value={uploadProgress} className="w-full" />}
           </div>
         )}
 
-        {uploadStatus === "uploading" && (
-          <div className="w-full p-4 border-t border-gray-200">
-            <Progress value={uploadProgress} className="w-full" />
-            <p className="text-center text-sm text-gray-600 mt-2">{uploadProgress}% Uploaded</p>
-          </div>
-        )}
-
-        {errorMessage && (
-          <div className="w-full p-4 border-t border-gray-200 text-center text-red-600 text-sm">{errorMessage}</div>
-        )}
-
-        {uploadedUrl && uploadStatus === "success" && (
-          <div className="w-full p-4 border-t border-gray-200 text-center text-green-600 text-sm">
-            File uploaded successfully!{" "}
-            <a href={uploadedUrl} target="_blank" rel="noopener noreferrer" className="underline">
-              View File
-            </a>
-          </div>
-        )}
-
-        <div className="w-full p-4 border-t border-gray-200">
-          <Button onClick={handleUpload} disabled={!selectedFile || uploadStatus === "uploading"} className="w-full">
+        <div className="flex gap-2 w-full">
+          <Button
+            onClick={handleUpload}
+            disabled={files.length === 0 || uploadStatus === "uploading"}
+            className="flex-1"
+          >
             {uploadStatus === "uploading" ? "Uploading..." : "Upload File"}
           </Button>
+          {(uploadStatus === "uploading" || files.length > 0) && (
+            <Button variant="outline" onClick={handleCancelUpload} disabled={uploadStatus === "success"}>
+              Cancel
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

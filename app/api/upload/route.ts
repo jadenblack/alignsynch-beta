@@ -1,42 +1,35 @@
+import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
-import { uploadFile } from "@/lib/blob-storage"
 import { auth } from "@/lib/auth"
 
 export const config = {
   api: {
-    bodyParser: false, // Disable Next.js body parser for file uploads
+    bodyParser: false, // Disable Next.js's body parser for file uploads
   },
 }
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<NextResponse> {
   const session = await auth()
 
   if (!session || !session.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const formData = await request.formData()
-  const file = formData.get("file") as File | null
+  const { searchParams } = new URL(request.url)
+  const filename = searchParams.get("filename")
 
-  if (!file) {
-    return NextResponse.json({ error: "No file uploaded" }, { status: 400 })
-  }
-
-  // Basic file validation
-  const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
-  const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"]
-
-  if (file.size > MAX_FILE_SIZE) {
-    return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 413 })
-  }
-
-  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-    return NextResponse.json({ error: "Unsupported file type" }, { status: 415 })
+  if (!filename) {
+    return NextResponse.json({ error: "Filename is required" }, { status: 400 })
   }
 
   try {
-    const uploadedBlob = await uploadFile(file.name, file, { access: "public" })
-    return NextResponse.json({ success: true, url: uploadedBlob.url, pathname: uploadedBlob.pathname })
+    const blob = await put(filename, request.body as ReadableStream, {
+      access: "public",
+      // You can add more options here, e.g., contentType, addRandomSuffix
+      // contentType: request.headers.get('content-type') || undefined,
+    })
+
+    return NextResponse.json(blob)
   } catch (error) {
     console.error("Error uploading file:", error)
     return NextResponse.json({ error: "Failed to upload file" }, { status: 500 })

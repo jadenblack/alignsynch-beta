@@ -8,7 +8,6 @@ module.exports = {
     "./src/**/*.{ts,tsx}",
     "*.{js,ts,jsx,tsx,mdx}",
   ],
-  prefix: "",
   theme: {
     container: {
       center: true,
@@ -25,11 +24,11 @@ module.exports = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          default: "hsl(var(--primary))",
+          default: "#34D399", // Blue-green highlight
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          default: "hsl(var(--secondary))",
+          default: "#F3F4F6", // Subtle grey
           foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {

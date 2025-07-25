@@ -1,66 +1,67 @@
-import { Button } from "@/components/ui/button"
+import type React from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { FileUpload } from "@/components/ui/file-upload"
-import Link from "next/link"
+import { Progress } from "@/components/ui/progress"
+import { CloudUpload, FileText } from "lucide-react"
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-[calc(100vh-64px-64px)] p-4 md:p-8 bg-gray-50">
-      <section className="text-center mb-12">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">Welcome to AlignSynch Beta</h1>
-        <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto mb-8">
-          Your comprehensive platform for seamless project alignment and synchronization.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild className="px-8 py-3 text-lg">
-            <Link href="/dashboard">Go to Dashboard</Link>
-          </Button>
-          <Button asChild variant="outline" className="px-8 py-3 text-lg bg-transparent">
-            <Link href="/auth/signin">Sign In</Link>
-          </Button>
-        </div>
-      </section>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] bg-secondary-default p-4">
+      <Card className="w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-center text-primary-default">Welcome to AlignSynch Beta</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <p className="text-center text-lg text-gray-700">
+            Your all-in-one platform for seamless team alignment and project synchronization. Get started by exploring
+            our features or uploading your project files.
+          </p>
 
-      <section className="w-full max-w-4xl mb-12">
-        <Card className="p-6">
-          <CardHeader>
-            <CardTitle className="text-center text-2xl font-semibold mb-4">Upload Your Project Files</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-center text-gray-600 mb-6">
-              Easily upload documents, images, and other project assets to your secure AlignSynch storage.
-            </p>
-            <FileUpload />
-          </CardContent>
-        </Card>
-      </section>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FeatureCard
+              icon={<CloudUpload className="h-6 w-6 text-primary-default" />}
+              title="Effortless File Uploads"
+              description="Securely upload and manage your project documents with our integrated Vercel Blob storage."
+            >
+              <FileUpload />
+            </FeatureCard>
+            <FeatureCard
+              icon={<FileText className="h-6 w-6 text-primary-default" />}
+              title="Comprehensive Documentation"
+              description="Access detailed guides and resources to maximize your team's productivity."
+            >
+              <Button variant="outline" className="w-full bg-transparent">
+                Explore Docs
+              </Button>
+            </FeatureCard>
+          </div>
 
-      <section className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-8">
-        <Card className="p-6 text-center">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold mb-2">Project Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">Organize tasks, track progress, and manage resources efficiently.</p>
-          </CardContent>
-        </Card>
-        <Card className="p-6 text-center">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold mb-2">Team Collaboration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">Facilitate communication and collaboration among team members.</p>
-          </CardContent>
-        </Card>
-        <Card className="p-6 text-center">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold mb-2">Data Insights</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">Gain valuable insights from your project data with analytics.</p>
-          </CardContent>
-        </Card>
-      </section>
-    </main>
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Your Progress</h3>
+            <Progress value={75} className="w-full" />
+            <p className="text-sm text-gray-600 mt-1">75% of setup complete. Keep going!</p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
+interface FeatureCardProps {
+  icon: React.ReactNode
+  title: string
+  description: string
+  children: React.ReactNode
+}
+
+function FeatureCard({ icon, title, description, children }: FeatureCardProps) {
+  return (
+    <Card className="flex flex-col items-center p-6 text-center">
+      <div className="mb-4">{icon}</div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
+      <p className="text-gray-600 mb-4">{description}</p>
+      {children}
+    </Card>
   )
 }

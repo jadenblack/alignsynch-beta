@@ -1,45 +1,29 @@
 import { put, del, list } from "@vercel/blob"
-import { customAlphabet } from "nanoid"
 
-const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 10)
-
-export async function uploadFile(
-  filename: string,
-  file: File | Buffer,
-  options?: { access?: "public" | "private"; contentType?: string },
-) {
-  const { access = "public", contentType } = options || {}
-  const fileExtension = filename.split(".").pop()
-  const uniqueFilename = `${nanoid()}.${fileExtension}`
-
-  const blob = await put(uniqueFilename, file, {
-    access,
-    contentType: contentType || (file instanceof File ? file.type : undefined),
+export async function uploadFileToBlob(file: File): Promise<{ url: string; pathname: string }> {
+  const blob = await put(file.name, file, {
+    access: "public",
   })
-  return blob
+  return { url: blob.url, pathname: blob.pathname }
 }
 
-export async function deleteFile(url: string) {
+export async function deleteFileFromBlob(url: string): Promise<void> {
   await del(url)
 }
 
-export async function listFiles(prefix?: string) {
+export async function listFilesFromBlob(prefix?: string): Promise<any[]> {
   const { blobs } = await list({ prefix })
   return blobs
 }
 
-export async function uploadBuffer(
+export async function uploadBufferToBlob(
   filename: string,
   buffer: Buffer,
-  options?: { access?: "public" | "private"; contentType?: string },
-) {
-  const { access = "public", contentType = "application/octet-stream" } = options || {}
-  const fileExtension = filename.split(".").pop()
-  const uniqueFilename = `${nanoid()}.${fileExtension}`
-
-  const blob = await put(uniqueFilename, buffer, {
-    access,
-    contentType,
+  contentType: string,
+): Promise<{ url: string; pathname: string }> {
+  const blob = await put(filename, buffer, {
+    access: "public",
+    contentType: contentType,
   })
-  return blob
+  return { url: blob.url, pathname: blob.pathname }
 }

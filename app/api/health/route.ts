@@ -3,35 +3,27 @@ import { validateEnv } from "@/lib/env-validation"
 
 export async function GET() {
   try {
-    // Validate environment variables
     const envStatus = validateEnv()
-
-    // Basic system health checks
-    const uptime = process.uptime()
-    const memoryUsage = process.memoryUsage()
-
-    return NextResponse.json({
+    const healthStatus = {
       status: "ok",
       timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      memoryUsage: process.memoryUsage(),
       environment: process.env.NODE_ENV,
-      uptime: `${uptime.toFixed(2)} seconds`,
-      memoryUsage: {
-        rss: `${(memoryUsage.rss / 1024 / 1024).toFixed(2)} MB`,
-        heapTotal: `${(memoryUsage.heapTotal / 1024 / 1024).toFixed(2)} MB`,
-        heapUsed: `${(memoryUsage.heapUsed / 1024 / 1024).toFixed(2)} MB`,
-        external: `${(memoryUsage.external / 1024 / 1024).toFixed(2)} MB`,
+      vercel: {
+        env: process.env.VERCEL_ENV || "development",
+        region: process.env.VERCEL_REGION || "local",
+        url: process.env.VERCEL_URL || "http://localhost:3000",
+        gitCommitSha: process.env.VERCEL_GIT_COMMIT_SHA || "N/A",
+        gitCommitRef: process.env.VERCEL_GIT_COMMIT_REF || "N/A",
+        gitCommitTimestamp: process.env.VERCEL_GIT_COMMIT_TIMESTAMP || "N/A",
+        buildId: process.env.VERCEL_BUILD_ID || "N/A",
       },
       envValidation: envStatus,
-    })
+    }
+    return NextResponse.json(healthStatus, { status: 200 })
   } catch (error: any) {
     console.error("Health check failed:", error)
-    return NextResponse.json(
-      {
-        status: "error",
-        message: "Health check failed",
-        details: error.message,
-      },
-      { status: 500 },
-    )
+    return NextResponse.json({ status: "error", message: error.message }, { status: 500 })
   }
 }

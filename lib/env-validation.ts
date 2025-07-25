@@ -2,28 +2,33 @@ import { z } from "zod"
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  NEXTAUTH_URL: z.string().url("NEXTAUTH_URL must be a valid URL").min(1, "NEXTAUTH_URL is required"),
-  NEXTAUTH_SECRET: z.string().min(1, "NEXTAUTH_SECRET is required"),
+  NEXTAUTH_URL: z.string().url().optional(), // Optional for local dev, required for Vercel deployments
+  NEXTAUTH_SECRET: z.string().min(32), // Minimum length for a strong secret
 })
 
 export type Env = z.infer<typeof envSchema>
 
-export function validateEnv(): { success: boolean; errors?: string[] } {
-  const result = envSchema.safeParse(process.env)
+export function validateEnv(): { success: boolean; message?: string } {
+  try {
+    // Attempt to parse and validate environment variables
+    const parsedEnv = envSchema.parse(process.env)
 
-  if (!result.success) {
-    const errors = result.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-    console.error("❌ Invalid environment variables:", errors)
-    // In a production environment, you might want to throw an error to stop the build
-    // For development, we can just log and continue, but it's good to be strict.
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Invalid environment variables. Please check your .env.local or Vercel settings.")
+    // Check for NEXTAUTH_URL specifically in Vercel environments
+    if (process.env.VERCEL_ENV && !parsedEnv.NEXTAUTH_URL) {
+      console.warn(
+        "Warning: NEXTAUTH_URL is not set in Vercel environment. This may cause issues with NextAuth.js callbacks.",
+      )
     }
-    return { success: false, errors }
-  }
-  console.log("✅ Environment variables validated successfully.")
-  return { success: true }
-}
 
-// Export the validated environment variables for type safety if needed
-// export const env: Env = envSchema.parse(process.env);
+    console.log("✅ Environment variables validated successfully.")
+    return { success: true, message: "Environment variables are valid." }
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      const issues = error.errors.map((err) => `${err.path.join(".")}: ${err.message}`)
+      console.error("Environment variable validation failed:", issues)
+      return { success: false, message: `Environment validation failed: ${issues.join(", ")}` }
+    }
+    console.error("An unexpected error occurred during environment validation:", error)
+    return { success: false, message: "An unexpected error occurred during environment validation." }
+  }
+}
