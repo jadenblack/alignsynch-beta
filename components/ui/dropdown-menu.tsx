@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
-import { Check, ChevronRight, DotFilledIcon } from "@radix-ui/react-icons"
+import { Check, ChevronRight, DotIcon as DotFilled } from "lucide-react"
+
 import { cn } from "@/lib/utils"
 
 const DropdownMenu = DropdownMenuPrimitive.Root
@@ -26,7 +27,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
   <DropdownMenuPrimitive.SubTrigger
     ref={ref}
     className={cn(
-      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent",
+      "flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none focus:bg-accent data-[state=open]:bg-accent",
       inset && "pl-8",
       className,
     )}
@@ -126,7 +127,7 @@ const DropdownMenuRadioItem = React.forwardRef<
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
-        <DotFilledIcon className="h-4 w-4 fill-current" />
+        <DotFilled className="h-4 w-4 fill-current" />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}

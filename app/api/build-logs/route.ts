@@ -1,28 +1,28 @@
 import { NextResponse } from "next/server"
 
-// This is a mock endpoint as direct access to Vercel build logs via API is restricted for security.
-// In a real-world scenario, you would integrate with Vercel's API or a CI/CD service's API
-// to fetch actual build logs, if permissible and authenticated.
+// This is a simulated endpoint as direct access to Vercel build logs via API
+// from within the deployed application is not typically available for security reasons.
+// In a real-world scenario, you would integrate with Vercel's API (if allowed)
+// or a third-party logging service (e.g., Datadog, Sentry) to fetch build logs.
+
 export async function GET() {
-  const mockLogs = [
-    "INFO: Build initiated...",
-    "INFO: Cloning repository...",
-    "INFO: Restoring build cache...",
-    "INFO: Running install command: npm install --legacy-peer-deps",
-    "SUCCESS: Dependencies installed.",
-    "INFO: Running build command: npm run build",
-    "SUCCESS: Application built successfully.",
-    "INFO: Optimizing assets...",
-    "SUCCESS: Deployment complete.",
-    `Timestamp: ${new Date().toISOString()}`,
+  const simulatedLogs = [
+    { timestamp: new Date(Date.now() - 5000).toISOString(), level: "INFO", message: "Starting build process..." },
+    { timestamp: new Date(Date.now() - 4000).toISOString(), level: "INFO", message: "Installing dependencies..." },
+    { timestamp: new Date(Date.now() - 3000).toISOString(), level: "INFO", message: "Running Next.js build..." },
+    { timestamp: new Date(Date.now() - 2000).toISOString(), level: "INFO", message: "Optimizing assets..." },
+    { timestamp: new Date(Date.now() - 1000).toISOString(), level: "INFO", message: "Build successful!" },
+    { timestamp: new Date().toISOString(), level: "INFO", message: "Deployment complete." },
   ]
 
-  return NextResponse.json(
-    {
-      logs: mockLogs,
-      message:
-        "This is a mock build log endpoint. Actual Vercel build logs are accessed via the Vercel dashboard for security reasons.",
-    },
-    { status: 200 },
-  )
+  // In a real scenario, you might fetch logs from an external service:
+  // const response = await fetch('https://api.logging-service.com/logs');
+  // const realLogs = await response.json();
+
+  return NextResponse.json({
+    message: "Simulated build logs. For actual logs, check your Vercel dashboard.",
+    logs: simulatedLogs,
+    // You can add a link to the Vercel dashboard logs here for convenience
+    vercelDashboardLink: `https://vercel.com/${process.env.VERCEL_ORG_ID || "your-org"}/${process.env.VERCEL_PROJECT_ID || "your-project"}/deployments/${process.env.VERCEL_DEPLOYMENT_ID || "latest"}`,
+  })
 }

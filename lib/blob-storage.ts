@@ -1,33 +1,34 @@
-import { put, del, list } from "@vercel/blob"
+import { put, del, list, head } from "@vercel/blob"
+import { customAlphabet } from "nanoid"
 
-export async function uploadFileToBlob(filename: string, file: File): Promise<string> {
-  try {
-    const blob = await put(filename, file, {
-      access: "public",
-      addRandomSuffix: true,
-    })
-    return blob.url
-  } catch (error) {
-    console.error("Error uploading file to Vercel Blob:", error)
-    throw new Error("Failed to upload file to blob storage.")
-  }
+const nanoid = customAlphabet("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 7) // 7-character random string
+
+export async function uploadFile(file: File, userId: string): Promise<{ url: string; pathname: string }> {
+  const fileExtension = file.name.split(".").pop()
+  const filename = `${userId}/${nanoid()}.${fileExtension}`
+
+  const blob = await put(filename, file, {
+    access: "public",
+  })
+
+  return { url: blob.url, pathname: blob.pathname }
 }
 
-export async function deleteFileFromBlob(url: string): Promise<void> {
-  try {
-    await del(url)
-  } catch (error) {
-    console.error("Error deleting file from Vercel Blob:", error)
-    throw new Error("Failed to delete file from blob storage.")
-  }
+export async function deleteFile(pathname: string): Promise<void> {
+  await del(pathname)
 }
 
-export async function listFilesInBlob(): Promise<any[]> {
+export async function listFiles(prefix?: string): Promise<any[]> {
+  const { blobs } = await list({ prefix })
+  return blobs
+}
+
+export async function getFileMetadata(pathname: string): Promise<any | null> {
   try {
-    const { blobs } = await list()
-    return blobs
+    const blob = await head(pathname)
+    return blob
   } catch (error) {
-    console.error("Error listing files from Vercel Blob:", error)
-    throw new Error("Failed to list files from blob storage.")
+    console.error("Error getting blob metadata:", error)
+    return null
   }
 }

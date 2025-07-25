@@ -1,142 +1,122 @@
 "use client"
 
 import Link from "next/link"
+import { Package2, Menu, MapIcon as SitemapIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import {
-  MenuIcon,
-  HomeIcon,
-  LayoutDashboardIcon,
-  SettingsIcon,
-  UserIcon,
-  LogInIcon,
-  LogOutIcon,
-  ShieldIcon,
-  MapIcon as SitemapIcon,
-} from "lucide-react"
-import { useTheme } from "next-themes"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useSession, signOut } from "next-auth/react"
-import { hasPermission } from "@/lib/auth"
 import Image from "next/image"
+import { hasPermission } from "@/lib/auth"
 
-export default function SiteHeader() {
-  const { setTheme } = useTheme()
+export function SiteHeader() {
   const { data: session, status } = useSession()
   const isAuthenticated = status === "authenticated"
-  const userRole = session?.user?.role || "user"
+  const userRole = session?.user?.role || "user" // Default to 'user' if no role
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center justify-between space-x-4 sm:space-x-0">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center space-x-2">
-            <Image src="/logo.png" alt="AlignSynch Beta Logo" width={32} height={32} className="dark:invert" />
-            <span className="inline-block font-bold">AlignSynch Beta</span>
+    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-base">
+          <Image src="/logo.png" alt="AlignSynch Beta Logo" width={24} height={24} className="dark:invert" />
+          <span className="sr-only">AlignSynch Beta</span>
+        </Link>
+        <Link href="/dashboard" className="text-muted-foreground transition-colors hover:text-foreground">
+          Dashboard
+        </Link>
+        <Link href="/quiz/new" className="text-muted-foreground transition-colors hover:text-foreground">
+          New Quiz
+        </Link>
+        <Link href="/leaderboard" className="text-muted-foreground transition-colors hover:text-foreground">
+          Leaderboard
+        </Link>
+        <Link href="/design-system" className="text-muted-foreground transition-colors hover:text-foreground">
+          Design System
+        </Link>
+        <Link href="/sitemap" className="text-muted-foreground transition-colors hover:text-foreground">
+          <SitemapIcon className="h-5 w-5" />
+        </Link>
+        {isAuthenticated && hasPermission(userRole, "access_admin_panel") && (
+          <Link href="/admin" className="text-muted-foreground transition-colors hover:text-foreground">
+            Admin
           </Link>
-          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <Link href="/" className="transition-colors hover:text-primary">
-              <HomeIcon className="h-4 w-4 inline-block mr-1" /> Home
+        )}
+      </nav>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon" className="shrink-0 md:hidden bg-transparent">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left">
+          <nav className="grid gap-6 text-lg font-medium">
+            <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
+              <Package2 className="h-6 w-6" />
+              <span className="sr-only">AlignSynch Beta</span>
             </Link>
-            <Link href="/dashboard" className="transition-colors hover:text-primary">
-              <LayoutDashboardIcon className="h-4 w-4 inline-block mr-1" /> Dashboard
+            <Link href="/dashboard" className="hover:text-foreground">
+              Dashboard
             </Link>
-            <Link href="/settings" className="transition-colors hover:text-primary">
-              <SettingsIcon className="h-4 w-4 inline-block mr-1" /> Settings
+            <Link href="/quiz/new" className="hover:text-foreground">
+              New Quiz
             </Link>
-            <Link href="/sitemap" className="transition-colors hover:text-primary">
-              <SitemapIcon className="h-4 w-4 inline-block mr-1" /> Sitemap
+            <Link href="/leaderboard" className="hover:text-foreground">
+              Leaderboard
             </Link>
-            {isAuthenticated && hasPermission(userRole, "view_admin_dashboard") && (
-              <Link href="/admin" className="transition-colors hover:text-primary">
-                <ShieldIcon className="h-4 w-4 inline-block mr-1" /> Admin
+            <Link href="/design-system" className="hover:text-foreground">
+              Design System
+            </Link>
+            <Link href="/sitemap" className="hover:text-foreground">
+              Sitemap
+            </Link>
+            {isAuthenticated && hasPermission(userRole, "access_admin_panel") && (
+              <Link href="/admin" className="hover:text-foreground">
+                Admin
               </Link>
             )}
           </nav>
-        </div>
-        <div className="flex items-center space-x-4">
+        </SheetContent>
+      </Sheet>
+      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <div className="ml-auto flex-1 sm:flex-initial">{/* Search or other elements can go here */}</div>
+        {isAuthenticated ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Theme
+              <Button variant="secondary" size="icon" className="rounded-full">
+                <Image
+                  src={session.user?.image || "/placeholder.svg?height=32&width=32&query=user+avatar"}
+                  width={32}
+                  height={32}
+                  alt="Avatar"
+                  className="rounded-full"
+                />
+                <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setTheme("light")}>Light</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
+              <DropdownMenuLabel>{session.user?.name || session.user?.email}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <Link href="/settings">Settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => signOut()}>Logout</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <UserIcon className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{session.user?.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
-                    <p className="text-xs leading-none text-muted-foreground">Role: {session.user?.role}</p>
-                  </div>
-                </div>
-                <DropdownMenuItem onClick={() => signOut()}>
-                  <LogOutIcon className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button asChild>
-              <Link href="/auth/signin">
-                <LogInIcon className="mr-2 h-4 w-4" />
-                Sign In
-              </Link>
-            </Button>
-          )}
-
-          <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
-                <MenuIcon className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right">
-              <nav className="flex flex-col gap-6 pt-6 text-lg font-medium">
-                <Link href="/" className="flex items-center hover:text-primary">
-                  <HomeIcon className="h-5 w-5 inline-block mr-2" /> Home
-                </Link>
-                <Link href="/dashboard" className="flex items-center hover:text-primary">
-                  <LayoutDashboardIcon className="h-5 w-5 inline-block mr-2" /> Dashboard
-                </Link>
-                <Link href="/settings" className="flex items-center hover:text-primary">
-                  <SettingsIcon className="h-5 w-5 inline-block mr-2" /> Settings
-                </Link>
-                <Link href="/sitemap" className="flex items-center hover:text-primary">
-                  <SitemapIcon className="h-5 w-5 inline-block mr-2" /> Sitemap
-                </Link>
-                {isAuthenticated && hasPermission(userRole, "view_admin_dashboard") && (
-                  <Link href="/admin" className="flex items-center hover:text-primary">
-                    <ShieldIcon className="h-5 w-5 inline-block mr-2" /> Admin
-                  </Link>
-                )}
-                {!isAuthenticated && (
-                  <Link href="/auth/signin" className="flex items-center hover:text-primary">
-                    <LogInIcon className="h-5 w-5 inline-block mr-2" /> Sign In
-                  </Link>
-                )}
-                {isAuthenticated && (
-                  <Button variant="ghost" onClick={() => signOut()} className="justify-start pl-0">
-                    <LogOutIcon className="h-5 w-5 inline-block mr-2" /> Log Out
-                  </Button>
-                )}
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
+        ) : (
+          <Link href="/auth/signin">
+            <Button variant="default">Sign In</Button>
+          </Link>
+        )}
       </div>
     </header>
   )

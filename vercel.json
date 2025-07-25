@@ -1,17 +1,14 @@
 {
-  "framework": "nextjs",
   "buildCommand": "npm run build",
   "installCommand": "npm install --legacy-peer-deps",
-  "devCommand": "next dev",
+  "framework": "nextjs",
   "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 30
+    "api/**/*.ts": {
+      "maxDuration": 60
     }
   },
-  "build": {
-    "env": {
-      "NODE_VERSION": "18.17.0",
-      "NPM_VERSION": "9.x"
-    }
+  "env": {
+    "NODE_VERSION": "18.x",
+    "NPM_VERSION": "10.x"
   }
 }

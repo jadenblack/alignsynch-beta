@@ -4,23 +4,23 @@ import type React from "react"
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DEV_CREDENTIALS } from "@/lib/auth"
+import { useRouter } from "next/navigation"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
+    setLoading(true)
     setError(null)
 
     const result = await signIn("credentials", {
@@ -29,7 +29,7 @@ export default function SignInPage() {
       password,
     })
 
-    setIsLoading(false)
+    setLoading(false)
 
     if (result?.error) {
       setError(result.error)
@@ -39,7 +39,7 @@ export default function SignInPage() {
   }
 
   const handleQuickLogin = async (userEmail: string, userPassword: string) => {
-    setIsLoading(true)
+    setLoading(true)
     setError(null)
 
     const result = await signIn("credentials", {
@@ -48,7 +48,7 @@ export default function SignInPage() {
       password: userPassword,
     })
 
-    setIsLoading(false)
+    setLoading(false)
 
     if (result?.error) {
       setError(result.error)
@@ -58,59 +58,61 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-64px-64px)] items-center justify-center p-4">
+    <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">Sign In</CardTitle>
+          <CardTitle className="text-2xl">Sign In</CardTitle>
           <CardDescription>Enter your credentials to access your account.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignIn} className="space-y-4">
-            <div className="space-y-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
-            <div className="space-y-2">
+            <div>
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                required
+                placeholder="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
             </div>
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing In..." : "Sign In"}
+            {error && <p className="text-destructive text-sm text-center">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
             </Button>
           </form>
-        </CardContent>
-        {process.env.NODE_ENV !== "production" && (
-          <CardFooter className="flex flex-col gap-2 pt-4 border-t mt-4">
-            <p className="text-sm text-muted-foreground">Quick Login (Dev Only):</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
-              {DEV_CREDENTIALS.map((user) => (
-                <Button
-                  key={user.id}
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleQuickLogin(user.email, user.password)}
-                  disabled={isLoading}
-                >
-                  {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                </Button>
-              ))}
+
+          {process.env.NODE_ENV !== "production" && (
+            <div className="mt-6 border-t pt-4">
+              <p className="text-center text-sm text-muted-foreground mb-3">Quick Login (Development Only)</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {DEV_CREDENTIALS.map((user) => (
+                  <Button
+                    key={user.email}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickLogin(user.email, user.password)}
+                    disabled={loading}
+                  >
+                    Login as {user.role}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </CardFooter>
-        )}
+          )}
+        </CardContent>
       </Card>
     </div>
   )

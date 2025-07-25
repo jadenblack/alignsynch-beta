@@ -2,20 +2,45 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   try {
-    const healthStatus = {
-      status: "ok",
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      memoryUsage: process.memoryUsage(),
-      environment: process.env.NODE_ENV,
-      vercelRegion: process.env.VERCEL_REGION || "unknown",
-      nextAuthUrl: process.env.NEXTAUTH_URL ? "set" : "not set",
-      nextAuthSecret: process.env.NEXTAUTH_SECRET ? "set" : "not set",
-      blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN ? "set" : "not set",
+    // Basic health check: check if environment variables are accessible
+    const nextAuthSecret = process.env.NEXTAUTH_SECRET
+    const nextAuthUrl = process.env.NEXTAUTH_URL
+    const blobReadWriteToken = process.env.BLOB_READ_WRITE_TOKEN
+
+    if (!nextAuthSecret || !nextAuthUrl || !blobReadWriteToken) {
+      return NextResponse.json(
+        {
+          status: "unhealthy",
+          message: "Missing critical environment variables",
+          details: {
+            NEXTAUTH_SECRET: nextAuthSecret ? "set" : "missing",
+            NEXTAUTH_URL: nextAuthUrl ? "set" : "missing",
+            BLOB_READ_WRITE_TOKEN: blobReadWriteToken ? "set" : "missing",
+          },
+        },
+        { status: 500 },
+      )
     }
-    return NextResponse.json(healthStatus, { status: 200 })
-  } catch (error) {
+
+    // You can add more checks here, e.g., database connection, external service reachability
+    // For now, we'll assume if env vars are present, the app is generally healthy.
+
+    return NextResponse.json({
+      status: "healthy",
+      message: "Application is running and essential environment variables are set.",
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(), // Node.js process uptime
+      memoryUsage: process.memoryUsage(),
+    })
+  } catch (error: any) {
     console.error("Health check failed:", error)
-    return NextResponse.json({ status: "error", message: (error as Error).message }, { status: 500 })
+    return NextResponse.json(
+      {
+        status: "unhealthy",
+        message: "An error occurred during health check",
+        error: error.message,
+      },
+      { status: 500 },
+    )
   }
 }
