@@ -4,21 +4,19 @@ import type React from "react"
 
 import { useState } from "react"
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { DEV_CREDENTIALS } from "@/lib/auth"
+import { DEV_CREDENTIALS } from "@/lib/auth" // Import DEV_CREDENTIALS
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
@@ -32,40 +30,40 @@ export default function SignInPage() {
     if (result?.error) {
       setError(result.error)
     } else {
-      router.push("/dashboard")
+      // Redirect to dashboard or home page on successful login
+      window.location.href = "/dashboard"
     }
     setLoading(false)
   }
 
-  const handleQuickLogin = async (role: keyof typeof DEV_CREDENTIALS) => {
+  const handleQuickLogin = async (userEmail: string, userPassword: string) => {
     setLoading(true)
     setError(null)
-    const user = DEV_CREDENTIALS[role]
-    setEmail(user.email)
-    setPassword(user.password)
+    setEmail(userEmail)
+    setPassword(userPassword)
 
     const result = await signIn("credentials", {
       redirect: false,
-      email: user.email,
-      password: user.password,
+      email: userEmail,
+      password: userPassword,
     })
 
     if (result?.error) {
       setError(result.error)
     } else {
-      router.push("/dashboard")
+      window.location.href = "/dashboard"
     }
     setLoading(false)
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="flex min-h-[calc(100vh-64px-64px)] items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold">Sign In to AlignSynch</CardTitle>
+          <CardTitle className="text-center text-2xl">Sign In</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignIn} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -82,7 +80,7 @@ export default function SignInPage() {
               <Input
                 id="password"
                 type="password"
-                placeholder="password"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -94,19 +92,20 @@ export default function SignInPage() {
             </Button>
           </form>
 
-          {process.env.NODE_ENV === "development" && (
-            <div className="mt-6 border-t pt-4">
-              <p className="text-center text-sm text-muted-foreground mb-3">Quick Login (Development)</p>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.keys(DEV_CREDENTIALS).map((role) => (
+          {process.env.NODE_ENV !== "production" && (
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <h3 className="text-lg font-semibold mb-3 text-center">Quick Login (Dev Only)</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {DEV_CREDENTIALS.map((user) => (
                   <Button
-                    key={role}
-                    variant="outline"
-                    onClick={() => handleQuickLogin(role as keyof typeof DEV_CREDENTIALS)}
+                    key={user.email}
+                    variant="secondary"
+                    onClick={() => handleQuickLogin(user.email, user.password)}
                     disabled={loading}
-                    className="capitalize"
+                    className="flex flex-col h-auto py-2"
                   >
-                    Login as {role}
+                    <span className="font-medium">{user.role.charAt(0).toUpperCase() + user.role.slice(1)}</span>
+                    <span className="text-xs opacity-80">{user.email}</span>
                   </Button>
                 ))}
               </div>

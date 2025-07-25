@@ -1,79 +1,109 @@
-import type { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-
-export interface User {
-  id: string
-  email: string
-  name: string
-  role: "admin" | "moderator" | "user"
-  avatar?: string
-}
+import NextAuth from "next-auth"
+import Credentials from "next-auth/providers/credentials"
+import { z } from "zod"
 
 export const ROLE_PERMISSIONS = {
-  admin: ["read", "write", "delete", "manage_users", "manage_system"],
-  moderator: ["read", "write", "delete", "manage_content"],
-  user: ["read", "write"],
-} as const
-
-export const DEV_CREDENTIALS = {
-  admin: { email: "admin@alignsynch.com", password: "admin123", name: "Admin User" },
-  moderator: { email: "mod@alignsynch.com", password: "mod123", name: "Moderator User" },
-  user: { email: "user@alignsynch.com", password: "user123", name: "Regular User" },
+  admin: [
+    "dashboard",
+    "admin",
+    "users",
+    "settings",
+    "cicd",
+    "sitemap",
+    "design-system",
+    "quiz",
+    "leaderboard",
+    "categories",
+    "insights",
+    "focus-areas",
+    "profile",
+  ],
+  moderator: ["dashboard", "quiz", "leaderboard", "categories", "insights", "focus-areas", "profile"],
+  user: ["dashboard", "quiz", "leaderboard", "profile"],
 }
 
-export function hasPermission(userRole: string, permission: string): boolean {
-  const permissions = ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS]
-  return permissions?.includes(permission as any) || false
-}
+export const DEV_CREDENTIALS = [
+  {
+    email: "admin@example.com",
+    password: "password",
+    name: "Admin User",
+    role: "admin",
+  },
+  {
+    email: "moderator@example.com",
+    password: "password",
+    name: "Moderator User",
+    role: "moderator",
+  },
+  {
+    email: "user@example.com",
+    password: "password",
+    name: "Regular User",
+    role: "user",
+  },
+]
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
-    CredentialsProvider({
-      name: "credentials",
+    Credentials({
+      name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null
-        }
+        const parsedCredentials = z
+          .object({ email: z.string().email(), password: z.string().min(6) })
+          .safeParse(credentials)
 
-        // Check against dev credentials
-        for (const [role, creds] of Object.entries(DEV_CREDENTIALS)) {
-          if (credentials.email === creds.email && credentials.password === creds.password) {
+        if (parsedCredentials.success) {
+          const { email, password } = parsedCredentials.data
+          const user = DEV_CREDENTIALS.find((u) => u.email === email && u.password === password)
+
+          if (user) {
             return {
-              id: role,
-              email: creds.email,
-              name: creds.name,
-              role: role as "admin" | "moderator" | "user",
+              id: user.email, // Using email as ID for simplicity
+              name: user.name,
+              email: user.email,
+              role: user.role,
             }
           }
         }
-
         return null
       },
     }),
   ],
+  pages: {
+    signIn: "/auth/signin",
+  },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
-        token.role = (user as User).role
+        token.role = user.role
       }
       return token
     },
-    async session({ session, token }) {
-      if (session.user) {
-        ;(session.user as User).role = token.role as "admin" | "moderator" | "user"
-        session.user.id = token.sub!
+    async session({ session, token }: { session: any; token: any }) {
+      if (token) {
+        session.user.role = token.role
       }
       return session
     },
   },
-  pages: {
-    signIn: "/auth/signin",
-  },
-  session: {
-    strategy: "jwt",
-  },
+  secret: process.env.NEXTAUTH_SECRET,
+}
+
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth(authOptions)
+
+export function hasPermission(userRole: string, requiredRole: string): boolean {
+  const userPermissions = ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS] || []
+  const requiredPermissions = ROLE_PERMISSIONS[requiredRole as keyof typeof ROLE_PERMISSIONS] || []
+
+  // A user has permission if their role's permissions include all required permissions
+  return requiredPermissions.every((permission) => userPermissions.includes(permission))
 }

@@ -1,10 +1,24 @@
 import { NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
 
 export async function GET() {
   try {
+    const session = await auth()
+
+    // In a real scenario, you might want to restrict this to admin users
+    // if (!session || session.user?.role !== 'admin') {
+    //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
+
     const deploymentStatus = {
-      status: "success",
-      timestamp: new Date().toISOString(),
+      appVersion: process.env.npm_package_version || "unknown",
+      lastDeployed: process.env.VERCEL_GIT_COMMIT_TIMESTAMP || "N/A",
+      commitSha: process.env.VERCEL_GIT_COMMIT_SHA || "N/A",
+      branch: process.env.VERCEL_GIT_COMMIT_REF || "N/A",
+      environment: process.env.VERCEL_ENV || "development",
+      buildId: process.env.VERCEL_BUILD_ID || "N/A",
+      status: "active", // Assuming if this API is reachable, the deployment is active
+      message: "Application is running and serving requests.",
       buildInfo: {
         version: "2.0.1",
         environment: process.env.NODE_ENV || "unknown",
