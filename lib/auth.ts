@@ -1,82 +1,105 @@
-import type { NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
+import NextAuth from "next-auth"
+import Credentials from "next-auth/providers/credentials"
+import { z } from "zod"
 
+// Define user roles and their permissions
 export const ROLE_PERMISSIONS = {
-  admin: ["manage_users", "view_dashboard", "access_admin_panel"],
-  moderator: ["view_dashboard", "moderate_content"],
-  user: ["view_dashboard"],
-}
+  admin: ["admin:full", "user:manage", "content:manage", "settings:manage", "deployment:monitor"],
+  moderator: ["user:view", "content:manage"],
+  user: ["content:view"],
+} as const
 
+export type UserRole = keyof typeof ROLE_PERMISSIONS
+
+// Mock user data for development/testing
 export const DEV_CREDENTIALS = [
   {
     email: "admin@example.com",
     password: "password",
     name: "Admin User",
-    role: "admin",
+    role: "admin" as UserRole,
   },
   {
     email: "moderator@example.com",
     password: "password",
     name: "Moderator User",
-    role: "moderator",
+    role: "moderator" as UserRole,
   },
   {
     email: "user@example.com",
     password: "password",
     name: "Regular User",
-    role: "user",
+    role: "user" as UserRole,
   },
 ]
 
-export const authOptions: NextAuthOptions = {
+// Helper function to check if a user has a specific permission
+export function hasPermission(userRole: UserRole, requiredPermission: string): boolean {
+  const permissions = ROLE_PERMISSIONS[userRole] || []
+  return permissions.includes(requiredPermission) || permissions.includes("admin:full")
+}
+
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth({
+  pages: {
+    signIn: "/auth/signin",
+  },
   providers: [
-    CredentialsProvider({
-      name: "Credentials",
+    Credentials({
       credentials: {
-        email: { label: "Email", type: "text" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
-        // This is a simplified example for development.
-        // In a real application, you would query your database here.
-        const user = DEV_CREDENTIALS.find((u) => u.email === credentials?.email && u.password === credentials?.password)
+      authorize: async (credentials) => {
+        const parsedCredentials = z
+          .object({ email: z.string().email(), password: z.string().min(6) })
+          .safeParse(credentials)
 
-        if (user) {
-          return {
-            id: user.email, // Use email as ID for simplicity
-            name: user.name,
-            email: user.email,
-            role: user.role,
+        if (parsedCredentials.success) {
+          const { email, password } = parsedCredentials.data
+
+          // In a real application, you would fetch user from a database
+          // and verify the password (e.g., using bcrypt.compare)
+          const user = DEV_CREDENTIALS.find((u) => u.email === email && u.password === password)
+
+          if (user) {
+            return {
+              id: user.email, // Use email as ID for simplicity in mock
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            }
           }
         }
+
         return null
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
   callbacks: {
-    async jwt({ token, user }) {
+    jwt: async ({ token, user }) => {
       if (user) {
-        token.role = user.role
+        token.id = user.id
+        token.role = (user as any).role // Add role to token
       }
       return token
     },
-    async session({ session, token }) {
-      if (token.role) {
-        session.user.role = token.role
+    session: async ({ session, token }) => {
+      if (token) {
+        session.user.id = token.id as string
+        session.user.role = token.role as UserRole // Add role to session
       }
       return session
     },
   },
-  pages: {
-    signIn: "/auth/signin",
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
-
-export function hasPermission(userRole: string, requiredPermission: string): boolean {
-  const permissions = ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS] || []
-  return permissions.includes(requiredPermission)
-}
+  debug: process.env.NODE_ENV === "development",
+})

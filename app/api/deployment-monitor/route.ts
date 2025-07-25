@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
+import { hasPermission } from "@/lib/auth"
 
 export async function GET() {
   try {
+    const session = await auth()
+
+    if (!session || !session.user || !hasPermission((session.user as any).role, "admin")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const deploymentStatus = {
       status: "success",
       message: "Deployment is active and running.",

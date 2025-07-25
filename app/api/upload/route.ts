@@ -1,20 +1,19 @@
-import { uploadFile } from "@/lib/blob-storage"
 import { NextResponse } from "next/server"
-import { authOptions } from "@/lib/auth"
-import { getServerSession } from "next-auth"
+import { uploadFile } from "@/lib/blob-storage"
+import { auth } from "@/lib/auth"
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
 
-  if (!session || !session.user?.email) {
-    return new NextResponse("Unauthorized", { status: 401 })
+  if (!session || !session.user || !session.user.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
   const formData = await request.formData()
   const file = formData.get("file") as File | null
 
   if (!file) {
-    return new NextResponse("No file uploaded", { status: 400 })
+    return NextResponse.json({ error: "No file uploaded" }, { status: 400 })
   }
 
   // Basic file validation
@@ -22,18 +21,18 @@ export async function POST(request: Request) {
   const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf"]
 
   if (file.size > MAX_FILE_SIZE) {
-    return new NextResponse("File size exceeds 10MB limit", { status: 400 })
+    return NextResponse.json({ error: "File size exceeds 10MB limit" }, { status: 413 })
   }
 
   if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-    return new NextResponse("Invalid file type. Only JPG, PNG, and PDF are allowed.", { status: 400 })
+    return NextResponse.json({ error: "Unsupported file type" }, { status: 415 })
   }
 
   try {
-    const { url, pathname } = await uploadFile(file, session.user.email)
-    return NextResponse.json({ url, pathname })
+    const { url, pathname } = await uploadFile(file, session.user.id)
+    return NextResponse.json({ url, pathname }, { status: 200 })
   } catch (error) {
-    console.error("Error uploading file:", error)
-    return new NextResponse("Failed to upload file", { status: 500 })
+    console.error("File upload failed:", error)
+    return NextResponse.json({ error: "Failed to upload file", details: (error as Error).message }, { status: 500 })
   }
 }

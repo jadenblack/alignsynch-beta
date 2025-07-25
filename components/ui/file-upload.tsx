@@ -1,161 +1,197 @@
 "use client"
 
+import { cn } from "@/lib/utils"
+
 import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
+import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { UploadCloud, FileText, ImageIcon, XCircle } from "lucide-react"
 
 interface FileUploadProps {
-  onUploadSuccess?: (url: string, pathname: string) => void
-  onUploadError?: (error: string) => void
+  onFileUploadSuccess?: (url: string, pathname: string) => void
+  onFileUploadError?: (error: string) => void
   maxSize?: number // in bytes, default 10MB
   allowedTypes?: string[] // e.g., ['image/jpeg', 'application/pdf']
 }
 
 export function FileUpload({
-  onUploadSuccess,
-  onUploadError,
-  maxSize = 10 * 1024 * 1024, // 10MB
+  onFileUploadSuccess,
+  onFileUploadError,
+  maxSize = 10 * 1024 * 1024, // Default 10MB
   allowedTypes = ["image/jpeg", "image/png", "application/pdf"],
 }: FileUploadProps) {
+  const [file, setFile] = useState<File | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [uploading, setUploading] = useState(false)
-  const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const [uploadedFile, setUploadedFile] = useState<{ name: string; url: string; type: string } | null>(null)
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null)
 
   const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
+    (acceptedFiles: File[]) => {
+      setError(null)
+      setUploadedFileUrl(null)
+      setUploadProgress(0)
+
       if (acceptedFiles.length === 0) {
         setError("No file selected or file type not allowed.")
+        onFileUploadError?.("No file selected or file type not allowed.")
         return
       }
 
-      const file = acceptedFiles[0]
+      const selectedFile = acceptedFiles[0]
 
-      if (file.size > maxSize) {
+      if (selectedFile.size > maxSize) {
         setError(`File size exceeds ${maxSize / (1024 * 1024)}MB limit.`)
+        onFileUploadError?.(`File size exceeds ${maxSize / (1024 * 1024)}MB limit.`)
         return
       }
 
-      if (!allowedTypes.includes(file.type)) {
-        setError(`Invalid file type. Allowed types: ${allowedTypes.map((t) => t.split("/")[1]).join(", ")}.`)
+      if (!allowedTypes.includes(selectedFile.type)) {
+        setError(`File type '${selectedFile.type}' not allowed. Allowed types: ${allowedTypes.join(", ")}.`)
+        onFileUploadError?.(`File type '${selectedFile.type}' not allowed.`)
         return
       }
 
-      setUploading(true)
-      setProgress(0)
-      setError(null)
-      setUploadedFile(null)
-
-      const formData = new FormData()
-      formData.append("file", file)
-
-      try {
-        // Simulate progress for demonstration
-        let currentProgress = 0
-        const interval = setInterval(() => {
-          currentProgress += 10
-          if (currentProgress <= 90) {
-            setProgress(currentProgress)
-          } else {
-            clearInterval(interval)
-          }
-        }, 100)
-
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-
-        clearInterval(interval) // Stop simulation
-
-        if (!response.ok) {
-          const errorData = await response.text()
-          throw new Error(errorData || "Upload failed")
-        }
-
-        const data = await response.json()
-        setUploadedFile({ name: file.name, url: data.url, type: file.type })
-        setProgress(100)
-        onUploadSuccess?.(data.url, data.pathname)
-      } catch (err: any) {
-        setError(err.message || "An unknown error occurred during upload.")
-        onUploadError?.(err.message || "An unknown error occurred during upload.")
-        setProgress(0)
-      } finally {
-        setUploading(false)
-      }
+      setFile(selectedFile)
     },
-    [maxSize, allowedTypes, onUploadSuccess, onUploadError],
+    [maxSize, allowedTypes, onFileUploadError],
   )
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, multiple: false })
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    maxFiles: 1,
+    accept: allowedTypes.reduce((acc, type) => ({ ...acc, [type]: [] }), {}),
+    maxSize: maxSize,
+  })
+
+  const handleUpload = async () => {
+    if (!file) {
+      setError("Please select a file first.")
+      onFileUploadError?.("No file selected for upload.")
+      return
+    }
+
+    setUploading(true)
+    setError(null)
+    setUploadProgress(0)
+
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      // Simulate upload progress (replace with actual progress tracking if your API supports it)
+      let currentProgress = 0
+      const interval = setInterval(() => {
+        currentProgress += 10
+        if (currentProgress <= 100) {
+          setUploadProgress(currentProgress)
+        } else {
+          clearInterval(interval)
+        }
+      }, 100)
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      clearInterval(interval) // Stop simulation
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "File upload failed.")
+      }
+
+      const data = await response.json()
+      setUploadedFileUrl(data.url)
+      setUploadProgress(100)
+      onFileUploadSuccess?.(data.url, data.pathname)
+    } catch (err: any) {
+      setError(err.message)
+      onFileUploadError?.(err.message)
+      setUploadProgress(0)
+    } finally {
+      setUploading(false)
+      setFile(null) // Clear file after upload attempt
+    }
+  }
 
   const getFileIcon = (fileType: string) => {
     if (fileType.startsWith("image/")) {
-      return <ImageIcon className="h-12 w-12 text-muted-foreground" />
-    } else if (fileType === "application/pdf") {
-      return <FileText className="h-12 w-12 text-muted-foreground" />
+      return <ImageIcon className="h-12 w-12 text-gray-400" />
     }
-    return <FileText className="h-12 w-12 text-muted-foreground" />
+    if (fileType === "application/pdf") {
+      return <FileText className="h-12 w-12 text-red-500" />
+    }
+    return <FileText className="h-12 w-12 text-gray-400" />
   }
 
   return (
-    <Card className="w-full max-w-md">
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Upload File</CardTitle>
-        <CardDescription>Drag and drop your file here, or click to select.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
         <div
           {...getRootProps()}
-          className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground rounded-lg cursor-pointer hover:border-primary transition-colors"
+          className={cn(
+            "flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer",
+            isDragActive ? "border-primary-default bg-primary-default/10" : "border-gray-300 bg-gray-50",
+          )}
         >
           <input {...getInputProps()} />
+          <UploadCloud className="h-12 w-12 text-gray-400 mb-3" />
           {isDragActive ? (
-            <p className="text-primary">Drop the files here ...</p>
+            <p className="text-gray-600">Drop the files here ...</p>
           ) : (
-            <>
-              <UploadCloud className="h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground text-center">Drag 'n' drop a file here, or click to select one</p>
-              <p className="text-xs text-muted-foreground mt-2">
-                Max size: {maxSize / (1024 * 1024)}MB. Allowed: {allowedTypes.map((t) => t.split("/")[1]).join(", ")}
-              </p>
-            </>
+            <p className="text-gray-600 text-center">
+              Drag 'n' drop a file here, or click to select a file
+              <br />
+              <span className="text-sm text-gray-500">
+                (Max {maxSize / (1024 * 1024)}MB, {allowedTypes.map((t) => t.split("/")[1] || t).join(", ")})
+              </span>
+            </p>
           )}
         </div>
 
-        {uploading && (
-          <div className="mt-4">
-            <p className="text-sm text-muted-foreground mb-2">Uploading...</p>
-            <Progress value={progress} className="w-full" />
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 text-destructive flex items-center gap-2">
-            <XCircle className="h-5 w-5" />
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
-
-        {uploadedFile && !uploading && !error && (
-          <div className="mt-4 flex items-center gap-4 p-3 border rounded-md bg-accent/10">
-            {getFileIcon(uploadedFile.type)}
-            <div className="flex-1">
-              <p className="text-sm font-medium truncate">{uploadedFile.name}</p>
-              <a
-                href={uploadedFile.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-primary hover:underline"
-              >
-                View File
-              </a>
+        {file && (
+          <div className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+            <div className="flex items-center gap-3">
+              {getFileIcon(file.type)}
+              <div>
+                <p className="text-sm font-medium text-gray-800">{file.name}</p>
+                <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+              </div>
             </div>
+            <Button variant="ghost" size="icon" onClick={() => setFile(null)} disabled={uploading}>
+              <XCircle className="h-5 w-5 text-red-500" />
+            </Button>
           </div>
         )}
+
+        {uploading && (
+          <div className="space-y-2">
+            <Progress value={uploadProgress} className="w-full" />
+            <p className="text-sm text-gray-500 text-center">Uploading... {uploadProgress}%</p>
+          </div>
+        )}
+
+        {error && <p className="text-sm text-red-500 text-center">{error}</p>}
+
+        {uploadedFileUrl && (
+          <p className="text-sm text-green-600 text-center">
+            File uploaded successfully!{" "}
+            <a href={uploadedFileUrl} target="_blank" rel="noopener noreferrer" className="underline">
+              View File
+            </a>
+          </p>
+        )}
+
+        <Button onClick={handleUpload} className="w-full" disabled={!file || uploading}>
+          {uploading ? "Uploading..." : "Upload"}
+        </Button>
       </CardContent>
     </Card>
   )
