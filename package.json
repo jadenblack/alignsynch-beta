@@ -20,6 +20,7 @@
     "@radix-ui/react-collapsible": "latest",
     "@radix-ui/react-dialog": "latest",
     "@radix-ui/react-dropdown-menu": "latest",
+    "@radix-ui/react-icons": "latest",
     "@radix-ui/react-label": "latest",
     "@radix-ui/react-progress": "latest",
     "@radix-ui/react-scroll-area": "latest",
@@ -38,6 +39,7 @@
     "fs": "latest",
     "immer": "latest",
     "lucide-react": "^0.454.0",
+    "nanoid": "latest",
     "next": "14.2.16",
     "next-auth": "latest",
     "next-themes": "latest",
@@ -45,7 +47,6 @@
     "path": "latest",
     "react": "^18",
     "react-dom": "^18",
-    "react-dropzone": "latest",
     "reactflow": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
@@ -62,5 +63,8 @@
     "postcss": "^8.5",
     "tailwindcss": "3.4.4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   }
 }

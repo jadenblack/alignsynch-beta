@@ -1,21 +1,16 @@
 "use client"
 
-import type React from "react"
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useSession } from "next-auth/react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { useSession, signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { hasPermission } from "@/lib/auth"
-import { useEffect, useState } from "react"
 import { Progress } from "@/components/ui/progress"
-import { CloudUpload, FileText, Users, BarChart } from "lucide-react"
-import { FileUpload } from "@/components/ui/file-upload"
+import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [uploadStatus, setUploadStatus] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -25,113 +20,102 @@ export default function DashboardPage() {
 
   if (status === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-secondary-default">
-        <p>Loading dashboard...</p>
+      <div className="flex min-h-[calc(100vh-64px)] items-center justify-center">
+        <p className="text-lg text-gray-500 dark:text-gray-400">Loading dashboard...</p>
       </div>
     )
   }
 
-  const userRole = (session?.user as any)?.role || "user"
-
-  const handleUploadSuccess = (url: string, pathname: string) => {
-    setUploadStatus(`File uploaded successfully: ${pathname}`)
-    console.log("Uploaded file URL:", url)
+  if (!session) {
+    return null // Should redirect via useEffect
   }
 
-  const handleUploadError = (error: string) => {
-    setUploadStatus(`Upload failed: ${error}`)
-    console.error("Upload error:", error)
-  }
+  const userRole = (session.user as any)?.role || "user"
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] flex-col items-center justify-center bg-secondary-default p-4">
-      <Card className="w-full max-w-4xl">
-        <CardHeader>
-          <CardTitle className="text-center text-primary-default">
-            Welcome to your Dashboard, {session?.user?.name || "Guest"}!
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <p className="text-center text-lg text-gray-700">
-            Your current role: <span className="font-semibold capitalize">{userRole}</span>
-          </p>
+    <div className="flex flex-col min-h-[calc(100vh-64px)] p-4 sm:p-6 lg:p-8 bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto w-full space-y-8">
+        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+          Welcome, {session.user?.name || "User"}!
+        </h1>
+        <p className="text-lg text-gray-600 dark:text-gray-300">
+          Your role: <Badge variant="secondary">{userRole}</Badge>
+        </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <DashboardCard
-              icon={<CloudUpload className="h-6 w-6 text-primary-default" />}
-              title="File Upload"
-              description="Upload and manage your project files securely."
-            >
-              <FileUpload onUploadSuccess={handleUploadSuccess} onUploadError={handleUploadError} />
-              {uploadStatus && <p className="mt-2 text-sm text-center text-gray-600">{uploadStatus}</p>}
-            </DashboardCard>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card className="bg-white dark:bg-gray-800 shadow-md">
+            <CardHeader>
+              <CardTitle>Project Progress</CardTitle>
+              <CardDescription>Overview of your current projects.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-700 dark:text-gray-300">
+                  <span>Frontend Development</span>
+                  <span>75%</span>
+                </div>
+                <Progress value={75} className="w-full" />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm text-gray-700 dark:text-gray-300">
+                  <span>Backend API Integration</span>
+                  <span>50%</span>
+                </div>
+                <Progress value={50} className="w-full" />
+              </div>
+              <Button className="w-full">View All Projects</Button>
+            </CardContent>
+          </Card>
 
-            {hasPermission(userRole, "users") && (
-              <DashboardCard
-                icon={<Users className="h-6 w-6 text-primary-default" />}
-                title="User Management"
-                description="Manage user accounts and roles within the system."
-              >
-                <Button onClick={() => router.push("/admin/users")} className="w-full">
-                  Go to Users
-                </Button>
-              </DashboardCard>
-            )}
-
-            {hasPermission(userRole, "insights") && (
-              <DashboardCard
-                icon={<BarChart className="h-6 w-6 text-primary-default" />}
-                title="Insights & Analytics"
-                description="View performance metrics and application insights."
-              >
-                <Button onClick={() => router.push("/insights")} className="w-full">
-                  View Insights
-                </Button>
-              </DashboardCard>
-            )}
-
-            <DashboardCard
-              icon={<FileText className="h-6 w-6 text-primary-default" />}
-              title="Documentation"
-              description="Access comprehensive guides and resources."
-            >
-              <Button onClick={() => router.push("/design-system")} className="w-full">
-                Read Docs
+          <Card className="bg-white dark:bg-gray-800 shadow-md">
+            <CardHeader>
+              <CardTitle>Recent Activity</CardTitle>
+              <CardDescription>Latest updates and notifications.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
+              <p>• Task "Implement Auth" completed by Admin User.</p>
+              <p>• New file "report.pdf" uploaded by Moderator User.</p>
+              <p>• User "John Doe" updated profile information.</p>
+              <Button variant="outline" className="w-full bg-transparent">
+                View Activity Log
               </Button>
-            </DashboardCard>
-          </div>
+            </CardContent>
+          </Card>
 
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Overall Progress</h3>
-            <Progress value={85} className="w-full" />
-            <p className="text-sm text-gray-600 mt-1">85% of project goals achieved. Keep pushing!</p>
-          </div>
+          <Card className="bg-white dark:bg-gray-800 shadow-md">
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+              <CardDescription>Perform common tasks quickly.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button className="w-full">Create New Task</Button>
+              <Button variant="secondary" className="w-full">
+                Upload Document
+              </Button>
+              <Button variant="ghost" className="w-full">
+                Access Settings
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
-          <div className="flex justify-center mt-6">
-            <Button onClick={() => signOut()} variant="destructive">
-              Sign Out
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        {userRole === "admin" && (
+          <Card className="bg-white dark:bg-gray-800 shadow-md border-blue-500 dark:border-blue-400 border-l-4">
+            <CardHeader>
+              <CardTitle className="text-blue-600 dark:text-blue-400">Admin Panel Access</CardTitle>
+              <CardDescription>Manage users, settings, and system configurations.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => router.push("/admin/dashboard")}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600"
+              >
+                Go to Admin Dashboard
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
-  )
-}
-
-interface DashboardCardProps {
-  icon: React.ReactNode
-  title: string
-  description: string
-  children: React.ReactNode
-}
-
-function DashboardCard({ icon, title, description, children }: DashboardCardProps) {
-  return (
-    <Card className="flex flex-col items-center p-6 text-center">
-      <div className="mb-4">{icon}</div>
-      <h3 className="text-xl font-semibold text-gray-800 mb-2">{title}</h3>
-      <p className="text-gray-600 mb-4">{description}</p>
-      {children}
-    </Card>
   )
 }

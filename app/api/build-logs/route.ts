@@ -1,38 +1,34 @@
 import { NextResponse } from "next/server"
-import { auth } from "@/lib/auth"
-import { hasPermission } from "@/lib/auth"
+
+// This is a mock endpoint. In a real scenario, accessing Vercel build logs
+// directly via an API route would require Vercel API tokens and specific permissions,
+// and is generally not recommended for client-side access due to security concerns.
+// Build logs are best viewed directly in the Vercel dashboard.
 
 export async function GET() {
-  const session = await auth()
-
-  if (!session || !session.user || !hasPermission((session.user as any).role, "admin")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
-
-  // In a real application, you would integrate with Vercel's API
-  // or a logging service (e.g., Log Drains) to fetch actual build logs.
-  // For this example, we'll return mock data.
-  const mockBuildLogs = [
-    { timestamp: new Date(Date.now() - 60000).toISOString(), level: "INFO", message: "Starting build process..." },
-    { timestamp: new Date(Date.now() - 50000).toISOString(), level: "INFO", message: "Installing dependencies..." },
-    {
-      timestamp: new Date(Date.now() - 40000).toISOString(),
-      level: "INFO",
-      message: "Running `npm install --legacy-peer-deps`",
-    },
-    {
-      timestamp: new Date(Date.now() - 30000).toISOString(),
-      level: "INFO",
-      message: "Dependencies installed successfully.",
-    },
-    {
-      timestamp: new Date(Date.now() - 20000).toISOString(),
-      level: "INFO",
-      message: "Building Next.js application...",
-    },
-    { timestamp: new Date(Date.now() - 10000).toISOString(), level: "INFO", message: "Static assets optimized." },
-    { timestamp: new Date().toISOString(), level: "INFO", message: "Build completed successfully." },
+  const mockLogs = [
+    { timestamp: new Date().toISOString(), level: "INFO", message: "Starting build process..." },
+    { timestamp: new Date().toISOString(), level: "INFO", message: "Installing dependencies..." },
+    { timestamp: new Date().toISOString(), level: "INFO", message: "Running next build..." },
+    { timestamp: new Date().toISOString(), level: "SUCCESS", message: "Build completed successfully." },
+    { timestamp: new Date().toISOString(), level: "INFO", message: "Deployment assigned to domain." },
   ]
 
-  return NextResponse.json({ logs: mockBuildLogs })
+  // Simulate a potential error for demonstration
+  const shouldSimulateError = Math.random() < 0.1 // 10% chance of simulating an error
+  if (shouldSimulateError) {
+    mockLogs.push({
+      timestamp: new Date().toISOString(),
+      level: "ERROR",
+      message: "Simulated build error: Dependency conflict detected.",
+    })
+    mockLogs.push({
+      timestamp: new Date().toISOString(),
+      level: "ERROR",
+      message: "Build failed.",
+    })
+    return NextResponse.json({ status: "failed", logs: mockLogs }, { status: 500 })
+  }
+
+  return NextResponse.json({ status: "success", logs: mockLogs }, { status: 200 })
 }

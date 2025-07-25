@@ -12,7 +12,10 @@ const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "AlignSynch Beta",
-  description: "A comprehensive platform for team alignment and synchronization.",
+  description: "A Vercel-powered application for AlignSynch",
+  icons: {
+    icon: "/favicon.ico",
+  },
     generator: 'v0.dev'
 }
 
@@ -22,13 +25,12 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const session = await auth()
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <SessionProvider session={session}>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-            <div className="flex min-h-screen flex-col">
+            <div className="relative flex min-h-screen flex-col">
               <SiteHeader />
               <main className="flex-1">{children}</main>
               <SiteFooter />

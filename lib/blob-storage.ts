@@ -1,29 +1,23 @@
 import { put, del, list } from "@vercel/blob"
+import { customAlphabet } from "nanoid"
 
-export async function uploadFileToBlob(file: File): Promise<{ url: string; pathname: string }> {
-  const blob = await put(file.name, file, {
+const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10)
+
+export async function uploadFileToBlob(filename: string, file: File | Buffer, contentType: string) {
+  const fileExtension = filename.split(".").pop()
+  const newFilename = `${nanoid()}.${fileExtension}`
+  const blob = await put(newFilename, file, {
     access: "public",
+    contentType,
   })
-  return { url: blob.url, pathname: blob.pathname }
+  return blob
 }
 
-export async function deleteFileFromBlob(url: string): Promise<void> {
+export async function deleteFileFromBlob(url: string) {
   await del(url)
 }
 
-export async function listFilesFromBlob(prefix?: string): Promise<any[]> {
+export async function listFilesFromBlob(prefix?: string) {
   const { blobs } = await list({ prefix })
   return blobs
-}
-
-export async function uploadBufferToBlob(
-  filename: string,
-  buffer: Buffer,
-  contentType: string,
-): Promise<{ url: string; pathname: string }> {
-  const blob = await put(filename, buffer, {
-    access: "public",
-    contentType: contentType,
-  })
-  return { url: blob.url, pathname: blob.pathname }
 }

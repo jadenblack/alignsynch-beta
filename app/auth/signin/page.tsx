@@ -5,23 +5,23 @@ import type React from "react"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useRouter } from "next/navigation"
 import { DEV_CREDENTIALS } from "@/lib/auth"
+import { useRouter } from "next/navigation"
 
 export default function SignInPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [isSigningIn, setIsSigningIn] = useState(false)
   const router = useRouter()
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+    setIsSigningIn(true)
 
     const result = await signIn("credentials", {
       redirect: false,
@@ -29,27 +29,26 @@ export default function SignInPage() {
       password,
     })
 
-    setLoading(false)
+    setIsSigningIn(false)
 
     if (result?.error) {
       setError(result.error)
     } else {
-      router.push("/dashboard") // Redirect to dashboard on successful login
+      router.push("/dashboard")
     }
   }
 
-  const handleQuickLogin = async (role: "admin" | "moderator" | "user") => {
-    setLoading(true)
+  const handleQuickLogin = async (userEmail: string, userPassword: string) => {
     setError(null)
-    const credentials = DEV_CREDENTIALS[role]
+    setIsSigningIn(true)
 
     const result = await signIn("credentials", {
       redirect: false,
-      email: credentials.email,
-      password: credentials.password,
+      email: userEmail,
+      password: userPassword,
     })
 
-    setLoading(false)
+    setIsSigningIn(false)
 
     if (result?.error) {
       setError(result.error)
@@ -59,54 +58,58 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary-default p-4">
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-center text-primary-default">Sign In</CardTitle>
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold">Sign In</CardTitle>
+          <CardDescription>Enter your credentials to access your account.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignIn} className="space-y-4">
-            <div>
+          <form onSubmit={handleSignIn} className="space-y-6">
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="m@example.com"
+                required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="password"
+                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required
               />
             </div>
-            {error && <p className="text-destructive-default text-sm text-center">{error}</p>}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing In..." : "Sign In"}
+            {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
+            <Button type="submit" className="w-full" disabled={isSigningIn}>
+              {isSigningIn ? "Signing In..." : "Sign In"}
             </Button>
           </form>
 
           {process.env.NODE_ENV !== "production" && (
-            <div className="mt-6 border-t pt-4">
-              <p className="text-center text-sm text-gray-600 mb-2">Quick Login (Dev Only):</p>
-              <div className="flex justify-center gap-2">
-                <Button variant="secondary" onClick={() => handleQuickLogin("admin")} disabled={loading}>
-                  Admin
-                </Button>
-                <Button variant="secondary" onClick={() => handleQuickLogin("moderator")} disabled={loading}>
-                  Moderator
-                </Button>
-                <Button variant="secondary" onClick={() => handleQuickLogin("user")} disabled={loading}>
-                  User
-                </Button>
+            <div className="mt-6 border-t pt-6 space-y-4">
+              <p className="text-center text-sm text-gray-500 dark:text-gray-400">Quick Login (Development Only)</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {DEV_CREDENTIALS.map((user) => (
+                  <Button
+                    key={user.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleQuickLogin(user.email, user.password)}
+                    disabled={isSigningIn}
+                    className="flex flex-col h-auto py-2"
+                  >
+                    <span className="font-semibold">{user.name}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">{user.role}</span>
+                  </Button>
+                ))}
               </div>
             </div>
           )}

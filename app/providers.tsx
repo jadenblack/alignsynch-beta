@@ -10,11 +10,5 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
-        {children}
-      </ThemeProvider>
-    </SessionProvider>
-  )
+  return <SessionProvider>{children}</SessionProvider>
 }

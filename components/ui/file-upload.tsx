@@ -1,157 +1,234 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
-import { useDropzone } from "react-dropzone"
+import type React from "react"
+import { useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Card, CardContent } from "@/components/ui/card"
-import { CloudUpload, FileText, XCircle, CircleCheck } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface FileUploadProps {
-  onUploadSuccess?: (url: string, pathname: string) => void
+  onUploadSuccess?: (url: string) => void
   onUploadError?: (error: string) => void
-  maxFileSizeMb?: number
-  acceptedFileTypes?: string[]
+  allowedFileTypes?: string[]
+  maxFileSizeMB?: number
 }
 
 export function FileUpload({
   onUploadSuccess,
   onUploadError,
-  maxFileSizeMb = 10, // Default max file size to 10MB
-  acceptedFileTypes = ["image/*", "application/pdf"], // Default accepted types
+  allowedFileTypes = ["image/*", "application/pdf"],
+  maxFileSizeMB = 10,
 }: FileUploadProps) {
-  const [files, setFiles] = useState<File[]>([])
-  const [uploadProgress, setUploadProgress] = useState<number>(0)
-  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "success" | "error">("idle")
-  const abortControllerRef = useRef<AbortController | null>(null)
+  const [file, setFile] = useState<File | null>(null)
+  const [uploadProgress, setUploadProgress] = useState(0)
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles(acceptedFiles)
-    setUploadStatus("idle")
-    setUploadProgress(0)
-  }, [])
+  const handleFileChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setError(null)
+      setUploadProgress(0)
+      setPreviewUrl(null)
+      if (event.target.files && event.target.files[0]) {
+        const selectedFile = event.target.files[0]
 
-  const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
-    onDrop,
-    maxFiles: 1,
-    maxSize: maxFileSizeMb * 1024 * 1024, // Convert MB to bytes
-    accept: acceptedFileTypes.reduce((acc, type) => ({ ...acc, [type]: [] }), {}),
-  })
+        // Validate file type
+        const isFileTypeAllowed = allowedFileTypes.some((type) => {
+          if (type.endsWith("/*")) {
+            return selectedFile.type.startsWith(type.slice(0, -1))
+          }
+          return selectedFile.type === type
+        })
 
-  const handleUpload = async () => {
-    if (files.length === 0) {
-      onUploadError?.("No file selected for upload.")
+        if (!isFileTypeAllowed) {
+          setError(`Invalid file type. Allowed types: ${allowedFileTypes.join(", ")}`)
+          setFile(null)
+          return
+        }
+
+        // Validate file size
+        if (selectedFile.size > maxFileSizeMB * 1024 * 1024) {
+          setError(`File size exceeds ${maxFileSizeMB}MB limit.`)
+          setFile(null)
+          return
+        }
+
+        setFile(selectedFile)
+        if (selectedFile.type.startsWith("image/")) {
+          setPreviewUrl(URL.createObjectURL(selectedFile))
+        }
+      } else {
+        setFile(null)
+      }
+    },
+    [allowedFileTypes, maxFileSizeMB],
+  )
+
+  const handleUpload = useCallback(async () => {
+    if (!file) {
+      setError("Please select a file to upload.")
       return
     }
 
-    const file = files[0]
-    setUploadStatus("uploading")
+    setIsUploading(true)
+    setError(null)
     setUploadProgress(0)
-    abortControllerRef.current = new AbortController()
-    const signal = abortControllerRef.current.signal
 
     try {
-      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
-        method: "POST",
-        body: file,
-        signal,
-      })
+      const response = await fetch(
+        `/api/upload?filename=${encodeURIComponent(file.name)}&contentType=${encodeURIComponent(file.type)}`,
+        {
+          method: "POST",
+          body: file,
+          // For progress tracking, you'd typically use XMLHttpRequest or a library that supports it
+          // Fetch API doesn't directly support upload progress events
+        },
+      )
 
       if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.error || "File upload failed")
+        throw new Error(errorData.error || "Failed to upload file.")
       }
 
-      const data = await response.json()
+      const result = await response.json()
       setUploadProgress(100)
-      setUploadStatus("success")
-      onUploadSuccess?.(data.url, data.pathname)
-    } catch (error: any) {
-      if (error.name === "AbortError") {
-        console.log("Upload aborted")
-        setUploadStatus("idle") // Reset status if aborted
-      } else {
-        console.error("Upload error:", error)
-        setUploadStatus("error")
-        onUploadError?.(error.message || "An unknown error occurred during upload.")
-      }
+      onUploadSuccess?.(result.url)
+      setFile(null) // Clear file after successful upload
+      setPreviewUrl(null)
+    } catch (err: any) {
+      setError(err.message || "An unknown error occurred during upload.")
+      onUploadError?.(err.message || "An unknown error occurred.")
+      setUploadProgress(0)
     } finally {
-      abortControllerRef.current = null
+      setIsUploading(false)
     }
-  }
+  }, [file, onUploadSuccess, onUploadError])
 
-  const handleCancelUpload = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort()
-    }
-    setFiles([])
-    setUploadStatus("idle")
-    setUploadProgress(0)
-  }
+  const handleDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    event.stopPropagation()
+    event.dataTransfer.dropEffect = "copy"
+  }, [])
 
-  const displayFileName = files.length > 0 ? files[0].name : "No file selected"
+  const handleDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      setError(null)
+      setUploadProgress(0)
+      setPreviewUrl(null)
+
+      if (event.dataTransfer.files && event.dataTransfer.files[0]) {
+        const droppedFile = event.dataTransfer.files[0]
+
+        // Validate file type
+        const isFileTypeAllowed = allowedFileTypes.some((type) => {
+          if (type.endsWith("/*")) {
+            return droppedFile.type.startsWith(type.slice(0, -1))
+          }
+          return droppedFile.type === type
+        })
+
+        if (!isFileTypeAllowed) {
+          setError(`Invalid file type. Allowed types: ${allowedFileTypes.join(", ")}`)
+          setFile(null)
+          return
+        }
+
+        // Validate file size
+        if (droppedFile.size > maxFileSizeMB * 1024 * 1024) {
+          setError(`File size exceeds ${maxFileSizeMB}MB limit.`)
+          setFile(null)
+          return
+        }
+
+        setFile(droppedFile)
+        if (droppedFile.type.startsWith("image/")) {
+          setPreviewUrl(URL.createObjectURL(droppedFile))
+        }
+      }
+    },
+    [allowedFileTypes, maxFileSizeMB],
+  )
 
   return (
-    <Card className="w-full p-4">
-      <CardContent className="flex flex-col items-center justify-center space-y-4">
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle>Upload File</CardTitle>
+        <CardDescription>Drag & drop your file or click to select.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
         <div
-          {...getRootProps()}
-          className={cn(
-            "flex flex-col items-center justify-center w-full p-6 border-2 border-dashed rounded-lg cursor-pointer",
-            isDragActive ? "border-primary-default bg-primary-default/10" : "border-gray-300 bg-gray-50",
-            fileRejections.length > 0 && "border-destructive-default bg-destructive-default/10",
-          )}
+          className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+          onClick={() => document.getElementById("file-input")?.click()}
         >
-          <input {...getInputProps()} />
-          <CloudUpload className="h-12 w-12 text-gray-400 mb-3" />
-          {isDragActive ? (
-            <p className="text-gray-600">Drop the files here ...</p>
+          {previewUrl ? (
+            <img
+              src={previewUrl || "/placeholder.svg"}
+              alt="File preview"
+              className="max-h-full max-w-full object-contain"
+            />
           ) : (
-            <p className="text-gray-600 text-center">
-              Drag 'n' drop a file here, or <span className="text-primary-default font-medium">click to select</span>
-            </p>
+            <>
+              <svg
+                className="w-10 h-10 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a3 3 0 013 3v10a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h.01M12 16l-3-3m0 0l-3 3m3-3V4"
+                ></path>
+              </svg>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-300">
+                <span className="font-semibold">Click to upload</span> or drag and drop
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Max {maxFileSizeMB}MB (
+                {allowedFileTypes
+                  .map((type) => type.replace("image/*", "Images").replace("application/pdf", "PDF"))
+                  .join(", ")}
+                )
+              </p>
+            </>
           )}
-          <p className="text-sm text-gray-500 mt-1">
-            (Max {maxFileSizeMb}MB, accepted: {acceptedFileTypes.map((type) => type.split("/")[1] || type).join(", ")})
-          </p>
+          <Input
+            id="file-input"
+            type="file"
+            className="hidden"
+            onChange={handleFileChange}
+            accept={allowedFileTypes.join(",")}
+          />
         </div>
 
-        {fileRejections.length > 0 && (
-          <div className="text-destructive-default text-sm text-center">
-            {fileRejections[0].errors.map((e, index) => (
-              <p key={index}>{e.message}</p>
-            ))}
+        {file && (
+          <div className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-200">
+            <span>Selected: {file.name}</span>
+            <span>{(file.size / (1024 * 1024)).toFixed(2)} MB</span>
           </div>
         )}
 
-        {files.length > 0 && (
-          <div className="w-full space-y-2">
-            <div className="flex items-center justify-between text-sm text-gray-700">
-              <span className="flex items-center gap-2">
-                <FileText className="h-4 w-4" /> {displayFileName}
-              </span>
-              {uploadStatus === "success" && <CircleCheck className="h-5 w-5 text-green-500" />}
-              {uploadStatus === "error" && <XCircle className="h-5 w-5 text-destructive-default" />}
-            </div>
-            {uploadStatus === "uploading" && <Progress value={uploadProgress} className="w-full" />}
+        {isUploading && (
+          <div className="space-y-2">
+            <Label htmlFor="upload-progress">Uploading...</Label>
+            <Progress value={uploadProgress} id="upload-progress" className="w-full" />
           </div>
         )}
 
-        <div className="flex gap-2 w-full">
-          <Button
-            onClick={handleUpload}
-            disabled={files.length === 0 || uploadStatus === "uploading"}
-            className="flex-1"
-          >
-            {uploadStatus === "uploading" ? "Uploading..." : "Upload File"}
-          </Button>
-          {(uploadStatus === "uploading" || files.length > 0) && (
-            <Button variant="outline" onClick={handleCancelUpload} disabled={uploadStatus === "success"}>
-              Cancel
-            </Button>
-          )}
-        </div>
+        {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
+
+        <Button onClick={handleUpload} disabled={!file || isUploading} className="w-full">
+          {isUploading ? "Uploading..." : "Upload"}
+        </Button>
       </CardContent>
     </Card>
   )

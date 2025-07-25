@@ -1,34 +1,43 @@
 import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import type { NextAuthOptions } from "next-auth"
+import { z } from "zod"
 
-export const ROLE_PERMISSIONS = {
-  admin: [
-    "dashboard",
-    "admin",
-    "users",
-    "settings",
-    "quiz",
-    "leaderboard",
-    "categories",
-    "insights",
-    "focus-areas",
-    "design-system",
-    "design-showcase",
-    "sitemap",
-    "cicd",
-  ],
-  moderator: ["dashboard", "quiz", "leaderboard", "categories", "insights", "focus-areas"],
-  user: ["dashboard", "quiz", "leaderboard", "categories"],
+// Define user roles
+export type UserRole = "admin" | "moderator" | "user"
+
+// Define permissions for each role
+export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
+  admin: ["manage_users", "manage_settings", "view_logs", "access_admin_dashboard"],
+  moderator: ["moderate_content", "view_reports"],
+  user: ["create_content", "view_profile"],
 }
 
-export const DEV_CREDENTIALS = {
-  admin: { email: "admin@example.com", password: "password", role: "admin" },
-  moderator: { email: "moderator@example.com", password: "password", role: "moderator" },
-  user: { email: "user@example.com", password: "password", role: "user" },
-}
+// Mock user data for development/testing
+export const DEV_CREDENTIALS = [
+  {
+    id: "admin-user",
+    name: "Admin User",
+    email: "admin@example.com",
+    role: "admin",
+    password: "password", // In a real app, never store plain passwords
+  },
+  {
+    id: "moderator-user",
+    name: "Moderator User",
+    email: "moderator@example.com",
+    role: "moderator",
+    password: "password",
+  },
+  {
+    id: "regular-user",
+    name: "Regular User",
+    email: "user@example.com",
+    role: "user",
+    password: "password",
+  },
+]
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -37,51 +46,58 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials) {
-          return null
+        const parsedCredentials = z
+          .object({ email: z.string().email(), password: z.string().min(1) })
+          .safeParse(credentials)
+
+        if (parsedCredentials.success) {
+          const { email, password } = parsedCredentials.data
+          const user = DEV_CREDENTIALS.find((u) => u.email === email && u.password === password)
+
+          if (user) {
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            }
+          }
         }
-
-        const { email, password } = credentials
-
-        // In a real application, you would fetch user from a database
-        // and verify the password. For this example, we use mock users.
-        const mockUsers = Object.values(DEV_CREDENTIALS)
-        const user = mockUsers.find((u) => u.email === email && u.password === password)
-
-        if (user) {
-          return { id: user.email, name: user.email, email: user.email, role: user.role }
-        } else {
-          return null
-        }
+        return null
       },
     }),
   ],
   pages: {
     signIn: "/auth/signin",
   },
-  session: {
-    strategy: "jwt",
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role
+        token.role = (user as any).role // Add role to token
       }
       return token
     },
     async session({ session, token }) {
-      if (token) {
-        ;(session.user as any).role = token.role
+      if (session.user) {
+        ;(session.user as any).role = token.role // Add role to session user
       }
       return session
     },
   },
+  session: {
+    strategy: "jwt",
+  },
   secret: process.env.NEXTAUTH_SECRET,
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authOptions)
+export const {
+  handlers: { GET, POST },
+  auth,
+  signIn,
+  signOut,
+} = NextAuth(authOptions)
 
-export function hasPermission(userRole: string, requiredPermission: string): boolean {
-  const permissions = (ROLE_PERMISSIONS as any)[userRole] || []
-  return permissions.includes(requiredPermission)
+// Helper function to check if a user has a specific permission
+export function hasPermission(role: UserRole, permission: string): boolean {
+  return ROLE_PERMISSIONS[role]?.includes(permission) || false
 }
