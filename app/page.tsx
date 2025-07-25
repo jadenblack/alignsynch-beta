@@ -1,171 +1,70 @@
-"use client"
-
-import { useSession } from "next-auth/react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { ArrowRight, Users, Target, TrendingUp, Heart } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 export default function HomePage() {
-  const { data: session } = useSession()
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-xl font-bold text-slate-900">AlignSynch</h1>
-            <Badge variant="secondary" className="text-xs">
-              Beta
-            </Badge>
-          </div>
-          <nav className="flex items-center space-x-4">
-            {session ? (
-              <>
-                <span className="text-sm text-slate-600">Welcome, {session.user?.name}</span>
-                <Link href="/dashboard">
-                  <Button variant="outline" size="sm">
-                    Dashboard
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <Link href="/auth/signin">
-                <Button size="sm">Sign In</Button>
-              </Link>
-            )}
-          </nav>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-4xl w-full space-y-8 text-center">
+        <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 sm:text-6xl md:text-7xl">
+          Welcome to <span className="text-primary">AlignSynch Beta</span>
+        </h1>
+        <p className="mt-4 text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+          Your comprehensive platform for relationship alignment and communication. Discover tools to foster deeper
+          connections and stronger partnerships.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+          <Link href="/auth/signin" passHref>
+            <Button size="lg" className="w-full sm:w-auto">
+              Get Started
+            </Button>
+          </Link>
+          <Link href="/dashboard" passHref>
+            <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent">
+              View Dashboard
+            </Button>
+          </Link>
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
-            Align Your
-            <span className="bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent">
-              {" "}
-              Relationships
-            </span>
-          </h2>
-          <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-            A comprehensive platform designed to help couples, teams, and communities build stronger connections through
-            structured alignment processes.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={session ? "/dashboard" : "/auth/signin"}>
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700"
-              >
-                Get Started
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-            <Link href="/design-system">
-              <Button variant="outline" size="lg">
-                Explore Features
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-3 gap-8">
-          <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+          <Card className="flex flex-col items-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <CardTitle>Relationship Mapping</CardTitle>
-              <CardDescription>Visualize and understand the dynamics of your relationships</CardDescription>
+              <CardTitle className="text-2xl font-bold text-primary">Feature 1</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Progress value={85} className="mb-2" />
-              <p className="text-sm text-slate-600">85% alignment achieved</p>
+            <CardContent className="text-gray-700 dark:text-gray-300">
+              <p>
+                Explore our innovative tools designed to enhance communication and understanding in your relationships.
+              </p>
+              <Progress value={75} className="mt-4" />
+              <Badge className="mt-4 bg-primary text-primary-foreground">New</Badge>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm">
+          <Card className="flex flex-col items-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
-              <div className="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
-                <Target className="w-6 h-6 text-teal-600" />
-              </div>
-              <CardTitle>Goal Alignment</CardTitle>
-              <CardDescription>Sync your objectives and work towards common goals</CardDescription>
+              <CardTitle className="text-2xl font-bold text-primary">Feature 2</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Progress value={72} className="mb-2" />
-              <p className="text-sm text-slate-600">72% goals aligned</p>
+            <CardContent className="text-gray-700 dark:text-gray-300">
+              <p>Gain insights into your relationship dynamics with advanced analytics and personalized feedback.</p>
+              <Progress value={90} className="mt-4" />
+              <Badge className="mt-4 bg-secondary text-secondary-foreground">Popular</Badge>
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-sm">
+          <Card className="flex flex-col items-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                <TrendingUp className="w-6 h-6 text-purple-600" />
-              </div>
-              <CardTitle>Progress Tracking</CardTitle>
-              <CardDescription>Monitor your relationship growth over time</CardDescription>
+              <CardTitle className="text-2xl font-bold text-primary">Feature 3</CardTitle>
             </CardHeader>
-            <CardContent>
-              <Progress value={91} className="mb-2" />
-              <p className="text-sm text-slate-600">91% improvement rate</p>
+            <CardContent className="text-gray-700 dark:text-gray-300">
+              <p>Collaborate with partners and coaches to set goals and track progress towards stronger bonds.</p>
+              <Progress value={60} className="mt-4" />
+              <Badge className="mt-4 bg-accent text-accent-foreground">Beta</Badge>
             </CardContent>
           </Card>
         </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-16">
-        <Card className="border-0 shadow-xl bg-gradient-to-r from-blue-600 to-teal-600 text-white">
-          <CardContent className="p-12 text-center">
-            <h3 className="text-3xl font-bold mb-4">Ready to Transform Your Relationships?</h3>
-            <p className="text-xl mb-8 text-blue-100">
-              Join thousands of couples and teams who have improved their connections with AlignSynch.
-            </p>
-            <Link href={session ? "/dashboard" : "/auth/signin"}>
-              <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50">
-                Start Your Journey
-                <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-teal-500 rounded flex items-center justify-center">
-                <Heart className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-semibold text-slate-900">AlignSynch Beta</span>
-            </div>
-            <div className="flex space-x-6 text-sm text-slate-600">
-              <Link href="/privacy" className="hover:text-slate-900">
-                Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-slate-900">
-                Terms
-              </Link>
-              <Link href="/support" className="hover:text-slate-900">
-                Support
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      </div>
     </div>
   )
 }

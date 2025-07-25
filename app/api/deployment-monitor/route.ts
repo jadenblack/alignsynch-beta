@@ -7,7 +7,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       buildInfo: {
         version: "2.0.1",
-        environment: process.env.NODE_ENV,
+        environment: process.env.NODE_ENV || "unknown",
         nextjsVersion: "14.1.0",
         buildTime: new Date().toISOString(),
       },
@@ -28,6 +28,7 @@ export async function GET() {
         styling: "✅ Tailwind CSS compiled",
         routing: "✅ App Router active",
         api: "✅ API routes functional",
+        blobStorage: "✅ Vercel Blob integration active",
       },
       features: [
         "Role-based authentication system",
@@ -37,6 +38,7 @@ export async function GET() {
         "API route handlers",
         "TypeScript support",
         "Tailwind CSS styling",
+        "File upload via Vercel Blob",
       ],
       buildSteps: [
         "✅ Dependencies installed",

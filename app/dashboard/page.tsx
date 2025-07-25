@@ -1,144 +1,91 @@
 "use client"
 
 import { useSession } from "next-auth/react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Heart, Users, Target, TrendingUp, Settings, LogOut } from "lucide-react"
-import { signOut } from "next-auth/react"
-import Link from "next/link"
+import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import type { User } from "@/lib/auth" // Import the User type
 
 export default function DashboardPage() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
 
-  if (!session) {
+  useEffect(() => {
+    if (status === "loading") {
+      setLoading(true)
+    } else if (status === "unauthenticated") {
+      router.push("/auth/signin")
+    } else {
+      setLoading(false)
+    }
+  }, [status, router])
+
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card>
-          <CardContent className="pt-6">
-            <p>Please sign in to access the dashboard.</p>
-            <Link href="/auth/signin">
-              <Button className="mt-4">Sign In</Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="flex items-center justify-center min-h-screen">
+        <p>Loading dashboard...</p>
       </div>
     )
   }
 
+  const user = session?.user as User // Cast session.user to User type
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
-              <Heart className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-xl font-bold text-slate-900">AlignSynch Dashboard</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Badge variant="outline" className="capitalize">
-              {(session.user as any)?.role || "user"}
-            </Badge>
-            <span className="text-sm text-slate-600">Welcome, {session.user?.name}</span>
-            <Button variant="outline" size="sm" onClick={() => signOut()}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </Button>
-          </div>
-        </div>
-      </header>
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="max-w-4xl w-full space-y-8 text-center">
+        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 sm:text-5xl md:text-6xl">
+          Welcome, <span className="text-primary">{user?.name || "User"}</span>!
+        </h1>
+        <p className="mt-4 text-xl text-gray-600 dark:text-gray-400 leading-relaxed">
+          Your personalized overview of AlignSynch.
+        </p>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6">
-          {/* Welcome Section */}
-          <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+          <Card className="flex flex-col items-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
-              <CardTitle>Welcome to Your Dashboard</CardTitle>
-              <CardDescription>Manage your relationships and track your alignment progress</CardDescription>
+              <CardTitle className="text-2xl font-bold text-primary">My Progress</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center space-x-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-teal-100 rounded-full flex items-center justify-center">
-                  <Heart className="w-8 h-8 text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Your Alignment Score</h3>
-                  <Progress value={85} className="w-48 mt-2" />
-                  <p className="text-sm text-slate-600 mt-1">85% - Excellent progress!</p>
-                </div>
-              </div>
+            <CardContent className="text-gray-700 dark:text-gray-300">
+              <p>Track your alignment journey and see your achievements.</p>
+              <Progress value={80} className="mt-4" />
+              <Badge className="mt-4 bg-primary text-primary-foreground">On Track</Badge>
             </CardContent>
           </Card>
 
-          {/* Stats Grid */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Relationships</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">3</div>
-                <p className="text-xs text-muted-foreground">+1 from last month</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Goals Aligned</CardTitle>
-                <Target className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">12</div>
-                <p className="text-xs text-muted-foreground">+3 this week</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Progress Score</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">85%</div>
-                <p className="text-xs text-muted-foreground">+5% from last week</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Quick Actions */}
-          <Card>
+          <Card className="flex flex-col items-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Common tasks and navigation</CardDescription>
+              <CardTitle className="text-2xl font-bold text-primary">Recent Activity</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Button variant="outline" className="h-20 flex-col bg-transparent">
-                  <Users className="w-6 h-6 mb-2" />
-                  <span>Relationships</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col bg-transparent">
-                  <Target className="w-6 h-6 mb-2" />
-                  <span>Goals</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col bg-transparent">
-                  <TrendingUp className="w-6 h-6 mb-2" />
-                  <span>Progress</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col bg-transparent">
-                  <Settings className="w-6 h-6 mb-2" />
-                  <span>Settings</span>
-                </Button>
-              </div>
+            <CardContent className="text-gray-700 dark:text-gray-300">
+              <p>View your latest interactions and updates.</p>
+              <ul className="mt-4 text-left space-y-2">
+                <li>- Completed "Communication Basics" module</li>
+                <li>- Shared insights with partner</li>
+                <li>- Reviewed weekly report</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col items-center p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-primary">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="text-gray-700 dark:text-gray-300 space-y-3">
+              <Button className="w-full">Start New Session</Button>
+              <Button variant="outline" className="w-full bg-transparent">
+                View Reports
+              </Button>
+              <Button variant="ghost" className="w-full">
+                Update Profile
+              </Button>
             </CardContent>
           </Card>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

@@ -10,13 +10,13 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    domains: ['localhost'],
+    domains: ['blob.vercel-storage.com', 'localhost'],
     unoptimized: true,
   },
   env: {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

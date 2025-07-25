@@ -9,8 +9,14 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "AlignSynch Beta - Relationship Alignment Platform",
   description: "A comprehensive platform for relationship alignment and communication",
-  icons: {
-    icon: "/favicon.ico",
+  keywords: ["relationships", "communication", "alignment", "couples", "therapy"],
+  authors: [{ name: "AlignSynch Team" }],
+  creator: "AlignSynch",
+  publisher: "AlignSynch",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
   },
     generator: 'v0.dev'
 }

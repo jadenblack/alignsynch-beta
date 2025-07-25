@@ -3,41 +3,27 @@ import CredentialsProvider from "next-auth/providers/credentials"
 
 export interface User {
   id: string
-  name: string
   email: string
-  role: "admin" | "user" | "moderator"
-}
-
-export const DEV_CREDENTIALS = {
-  admin: {
-    email: "admin@alignsynch.com",
-    password: "admin123",
-    name: "Admin User",
-    role: "admin" as const,
-  },
-  user: {
-    email: "user@alignsynch.com",
-    password: "user123",
-    name: "Regular User",
-    role: "user" as const,
-  },
-  moderator: {
-    email: "mod@alignsynch.com",
-    password: "mod123",
-    name: "Moderator User",
-    role: "moderator" as const,
-  },
+  name: string
+  role: "admin" | "moderator" | "user"
+  avatar?: string
 }
 
 export const ROLE_PERMISSIONS = {
-  admin: ["read", "write", "delete", "manage_users", "system_settings"],
-  moderator: ["read", "write", "manage_content"],
-  user: ["read", "write_own"],
+  admin: ["read", "write", "delete", "manage_users", "manage_system"],
+  moderator: ["read", "write", "delete", "manage_content"],
+  user: ["read", "write"],
+} as const
+
+export const DEV_CREDENTIALS = {
+  admin: { email: "admin@alignsynch.com", password: "admin123", name: "Admin User" },
+  moderator: { email: "mod@alignsynch.com", password: "mod123", name: "Moderator User" },
+  user: { email: "user@alignsynch.com", password: "user123", name: "Regular User" },
 }
 
 export function hasPermission(userRole: string, permission: string): boolean {
   const permissions = ROLE_PERMISSIONS[userRole as keyof typeof ROLE_PERMISSIONS]
-  return permissions ? permissions.includes(permission) : false
+  return permissions?.includes(permission as any) || false
 }
 
 export const authOptions: NextAuthOptions = {
@@ -54,16 +40,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Check against dev credentials
-        const devUser = Object.values(DEV_CREDENTIALS).find(
-          (user) => user.email === credentials.email && user.password === credentials.password,
-        )
-
-        if (devUser) {
-          return {
-            id: devUser.email,
-            name: devUser.name,
-            email: devUser.email,
-            role: devUser.role,
+        for (const [role, creds] of Object.entries(DEV_CREDENTIALS)) {
+          if (credentials.email === creds.email && credentials.password === creds.password) {
+            return {
+              id: role,
+              email: creds.email,
+              name: creds.name,
+              role: role as "admin" | "moderator" | "user",
+            }
           }
         }
 
@@ -74,13 +58,14 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role
+        token.role = (user as User).role
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
-        ;(session.user as any).role = token.role
+        ;(session.user as User).role = token.role as "admin" | "moderator" | "user"
+        session.user.id = token.sub!
       }
       return session
     },

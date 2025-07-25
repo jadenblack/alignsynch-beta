@@ -1,121 +1,119 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
-import { signIn, getSession } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { DEV_CREDENTIALS } from "@/lib/auth"
-import { Heart, User, Shield, Settings } from "lucide-react"
 
 export default function SignInPage() {
-  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleDevLogin = async (role: keyof typeof DEV_CREDENTIALS) => {
-    setIsLoading(true)
-    const credentials = DEV_CREDENTIALS[role]
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
-    try {
-      const result = await signIn("credentials", {
-        email: credentials.email,
-        password: credentials.password,
-        redirect: false,
-      })
+    const result = await signIn("credentials", {
+      redirect: false,
+      email,
+      password,
+    })
 
-      if (result?.ok) {
-        const session = await getSession()
-        router.push("/dashboard")
-      } else {
-        console.error("Sign in failed")
-      }
-    } catch (error) {
-      console.error("Sign in error:", error)
-    } finally {
-      setIsLoading(false)
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      router.push("/dashboard")
     }
+    setLoading(false)
+  }
+
+  const handleQuickLogin = async (role: keyof typeof DEV_CREDENTIALS) => {
+    setLoading(true)
+    setError(null)
+    const user = DEV_CREDENTIALS[role]
+    setEmail(user.email)
+    setPassword(user.password)
+
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: user.email,
+      password: user.password,
+    })
+
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      router.push("/dashboard")
+    }
+    setLoading(false)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
-              <Heart className="w-6 h-6 text-white" />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl font-bold">Sign In to AlignSynch</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSignIn} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
             </div>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome to AlignSynch</h1>
-          <p className="text-slate-600 mt-2">Sign in to access your dashboard</p>
-        </div>
-
-        {/* Development Login Options */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Development Login</CardTitle>
-            <CardDescription>Quick access for testing different user roles</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button
-              onClick={() => handleDevLogin("admin")}
-              disabled={isLoading}
-              className="w-full justify-start bg-red-600 hover:bg-red-700"
-            >
-              <Shield className="w-4 h-4 mr-2" />
-              Sign in as Admin
-              <Badge variant="secondary" className="ml-auto">
-                Full Access
-              </Badge>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing In..." : "Sign In"}
             </Button>
+          </form>
 
-            <Button
-              onClick={() => handleDevLogin("moderator")}
-              disabled={isLoading}
-              variant="outline"
-              className="w-full justify-start"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Sign in as Moderator
-              <Badge variant="outline" className="ml-auto">
-                Content Management
-              </Badge>
-            </Button>
-
-            <Button
-              onClick={() => handleDevLogin("user")}
-              disabled={isLoading}
-              variant="outline"
-              className="w-full justify-start"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Sign in as User
-              <Badge variant="outline" className="ml-auto">
-                Standard Access
-              </Badge>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Credentials Info */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <h3 className="font-semibold text-blue-900 mb-2">Development Credentials</h3>
-            <div className="space-y-2 text-sm text-blue-800">
-              <div>
-                <strong>Admin:</strong> admin@alignsynch.com / admin123
-              </div>
-              <div>
-                <strong>Moderator:</strong> mod@alignsynch.com / mod123
-              </div>
-              <div>
-                <strong>User:</strong> user@alignsynch.com / user123
+          {process.env.NODE_ENV === "development" && (
+            <div className="mt-6 border-t pt-4">
+              <p className="text-center text-sm text-muted-foreground mb-3">Quick Login (Development)</p>
+              <div className="grid grid-cols-2 gap-2">
+                {Object.keys(DEV_CREDENTIALS).map((role) => (
+                  <Button
+                    key={role}
+                    variant="outline"
+                    onClick={() => handleQuickLogin(role as keyof typeof DEV_CREDENTIALS)}
+                    disabled={loading}
+                    className="capitalize"
+                  >
+                    Login as {role}
+                  </Button>
+                ))}
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }
