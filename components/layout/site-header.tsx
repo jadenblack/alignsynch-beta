@@ -1,167 +1,141 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useSession, signOut } from "next-auth/react"
-import { MenuIcon, LayoutDashboardIcon, UsersIcon, SettingsIcon, LogOutIcon, MapIcon } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useState } from "react"
+import {
+  MenuIcon,
+  HomeIcon,
+  LayoutDashboardIcon,
+  SettingsIcon,
+  UserIcon,
+  LogInIcon,
+  LogOutIcon,
+  ShieldIcon,
+  MapIcon as SitemapIcon,
+} from "lucide-react"
+import { useTheme } from "next-themes"
+import { useSession, signOut } from "next-auth/react"
+import { hasPermission } from "@/lib/auth"
+import Image from "next/image"
 
-export function SiteHeader() {
-  const pathname = usePathname()
+export default function SiteHeader() {
+  const { setTheme } = useTheme()
   const { data: session, status } = useSession()
-  const [isSheetOpen, setIsSheetOpen] = useState(false)
-
-  const userRole = (session?.user as any)?.role || "guest"
-
-  const mainNavItems = [
-    { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Dashboard", requiresAuth: true },
-    { href: "/sitemap", label: "Sitemap", icon: <MapIcon className="h-4 w-4 mr-2" /> },
-    { href: "/admin/dashboard", label: "Admin", requiresRole: "admin" },
-  ]
-
-  const filteredNavItems = mainNavItems.filter((item) => {
-    if (item.requiresAuth && status !== "authenticated") return false
-    if (item.requiresRole && userRole !== item.requiresRole) return false
-    return true
-  })
+  const isAuthenticated = status === "authenticated"
+  const userRole = session?.user?.role || "user"
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
-        <div className="flex gap-6 md:gap-10">
+      <div className="container flex h-16 items-center justify-between space-x-4 sm:space-x-0">
+        <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="inline-block font-bold text-lg">AlignSynch Beta</span>
+            <Image src="/logo.png" alt="AlignSynch Beta Logo" width={32} height={32} className="dark:invert" />
+            <span className="inline-block font-bold">AlignSynch Beta</span>
           </Link>
-          <nav className="hidden md:flex gap-6">
-            {filteredNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center text-sm font-medium transition-colors hover:text-primary",
-                  pathname === item.href ? "text-primary" : "text-muted-foreground",
-                )}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <div className="flex flex-1 items-center justify-end space-x-4">
-          <nav className="flex items-center space-x-2">
-            {status === "authenticated" ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={session.user?.image || "/placeholder-avatar.jpg"}
-                        alt={session.user?.name || "User"}
-                      />
-                      <AvatarFallback>{session.user?.name?.[0] || "U"}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      {session.user?.name && <p className="font-medium">{session.user.name}</p>}
-                      {session.user?.email && (
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">{session.user.email}</p>
-                      )}
-                      {userRole && <p className="text-xs text-muted-foreground">Role: {userRole}</p>}
-                    </div>
-                  </div>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
-                      <LayoutDashboardIcon className="mr-2 h-4 w-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-                  {userRole === "admin" && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin/dashboard">
-                        <UsersIcon className="mr-2 h-4 w-4" />
-                        Admin Panel
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <SettingsIcon className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => signOut()}>
-                    <LogOutIcon className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link href="/auth/signin">
-                <Button variant="default" size="sm">
-                  Sign In
-                </Button>
+          <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
+            <Link href="/" className="transition-colors hover:text-primary">
+              <HomeIcon className="h-4 w-4 inline-block mr-1" /> Home
+            </Link>
+            <Link href="/dashboard" className="transition-colors hover:text-primary">
+              <LayoutDashboardIcon className="h-4 w-4 inline-block mr-1" /> Dashboard
+            </Link>
+            <Link href="/settings" className="transition-colors hover:text-primary">
+              <SettingsIcon className="h-4 w-4 inline-block mr-1" /> Settings
+            </Link>
+            <Link href="/sitemap" className="transition-colors hover:text-primary">
+              <SitemapIcon className="h-4 w-4 inline-block mr-1" /> Sitemap
+            </Link>
+            {isAuthenticated && hasPermission(userRole, "view_admin_dashboard") && (
+              <Link href="/admin" className="transition-colors hover:text-primary">
+                <ShieldIcon className="h-4 w-4 inline-block mr-1" /> Admin
               </Link>
             )}
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <MenuIcon className="h-6 w-6" />
-                  <span className="sr-only">Toggle menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <nav className="flex flex-col gap-4 pt-6">
-                  {filteredNavItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={cn(
-                        "flex items-center text-lg font-medium transition-colors hover:text-primary",
-                        pathname === item.href ? "text-primary" : "text-muted-foreground",
-                      )}
-                      onClick={() => setIsSheetOpen(false)}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </Link>
-                  ))}
-                  {status === "authenticated" && (
-                    <>
-                      <Link
-                        href="/settings"
-                        className="flex items-center text-lg font-medium transition-colors hover:text-primary text-muted-foreground"
-                        onClick={() => setIsSheetOpen(false)}
-                      >
-                        <SettingsIcon className="mr-2 h-4 w-4" />
-                        Settings
-                      </Link>
-                      <Button
-                        variant="ghost"
-                        className="flex items-center justify-start text-lg font-medium transition-colors hover:text-primary text-muted-foreground p-0"
-                        onClick={() => {
-                          signOut()
-                          setIsSheetOpen(false)
-                        }}
-                      >
-                        <LogOutIcon className="mr-2 h-4 w-4" />
-                        Log out
-                      </Button>
-                    </>
-                  )}
-                </nav>
-              </SheetContent>
-            </Sheet>
           </nav>
+        </div>
+        <div className="flex items-center space-x-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                Theme
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>Light</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <UserIcon className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <div className="flex items-center justify-start gap-2 p-2">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{session.user?.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{session.user?.email}</p>
+                    <p className="text-xs leading-none text-muted-foreground">Role: {session.user?.role}</p>
+                  </div>
+                </div>
+                <DropdownMenuItem onClick={() => signOut()}>
+                  <LogOutIcon className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild>
+              <Link href="/auth/signin">
+                <LogInIcon className="mr-2 h-4 w-4" />
+                Sign In
+              </Link>
+            </Button>
+          )}
+
+          <Sheet>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon">
+                <MenuIcon className="h-6 w-6" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <nav className="flex flex-col gap-6 pt-6 text-lg font-medium">
+                <Link href="/" className="flex items-center hover:text-primary">
+                  <HomeIcon className="h-5 w-5 inline-block mr-2" /> Home
+                </Link>
+                <Link href="/dashboard" className="flex items-center hover:text-primary">
+                  <LayoutDashboardIcon className="h-5 w-5 inline-block mr-2" /> Dashboard
+                </Link>
+                <Link href="/settings" className="flex items-center hover:text-primary">
+                  <SettingsIcon className="h-5 w-5 inline-block mr-2" /> Settings
+                </Link>
+                <Link href="/sitemap" className="flex items-center hover:text-primary">
+                  <SitemapIcon className="h-5 w-5 inline-block mr-2" /> Sitemap
+                </Link>
+                {isAuthenticated && hasPermission(userRole, "view_admin_dashboard") && (
+                  <Link href="/admin" className="flex items-center hover:text-primary">
+                    <ShieldIcon className="h-5 w-5 inline-block mr-2" /> Admin
+                  </Link>
+                )}
+                {!isAuthenticated && (
+                  <Link href="/auth/signin" className="flex items-center hover:text-primary">
+                    <LogInIcon className="h-5 w-5 inline-block mr-2" /> Sign In
+                  </Link>
+                )}
+                {isAuthenticated && (
+                  <Button variant="ghost" onClick={() => signOut()} className="justify-start pl-0">
+                    <LogOutIcon className="h-5 w-5 inline-block mr-2" /> Log Out
+                  </Button>
+                )}
+              </nav>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

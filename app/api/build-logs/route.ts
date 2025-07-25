@@ -1,34 +1,28 @@
 import { NextResponse } from "next/server"
 
-// This is a mock endpoint. In a real scenario, accessing Vercel build logs
-// directly via an API route would require Vercel API tokens and specific permissions,
-// and is generally not recommended for client-side access due to security concerns.
-// Build logs are best viewed directly in the Vercel dashboard.
-
+// This is a mock endpoint as direct access to Vercel build logs via API is restricted for security.
+// In a real-world scenario, you would integrate with Vercel's API or a CI/CD service's API
+// to fetch actual build logs, if permissible and authenticated.
 export async function GET() {
   const mockLogs = [
-    { timestamp: new Date().toISOString(), level: "INFO", message: "Starting build process..." },
-    { timestamp: new Date().toISOString(), level: "INFO", message: "Installing dependencies..." },
-    { timestamp: new Date().toISOString(), level: "INFO", message: "Running next build..." },
-    { timestamp: new Date().toISOString(), level: "SUCCESS", message: "Build completed successfully." },
-    { timestamp: new Date().toISOString(), level: "INFO", message: "Deployment assigned to domain." },
+    "INFO: Build initiated...",
+    "INFO: Cloning repository...",
+    "INFO: Restoring build cache...",
+    "INFO: Running install command: npm install --legacy-peer-deps",
+    "SUCCESS: Dependencies installed.",
+    "INFO: Running build command: npm run build",
+    "SUCCESS: Application built successfully.",
+    "INFO: Optimizing assets...",
+    "SUCCESS: Deployment complete.",
+    `Timestamp: ${new Date().toISOString()}`,
   ]
 
-  // Simulate a potential error for demonstration
-  const shouldSimulateError = Math.random() < 0.1 // 10% chance of simulating an error
-  if (shouldSimulateError) {
-    mockLogs.push({
-      timestamp: new Date().toISOString(),
-      level: "ERROR",
-      message: "Simulated build error: Dependency conflict detected.",
-    })
-    mockLogs.push({
-      timestamp: new Date().toISOString(),
-      level: "ERROR",
-      message: "Build failed.",
-    })
-    return NextResponse.json({ status: "failed", logs: mockLogs }, { status: 500 })
-  }
-
-  return NextResponse.json({ status: "success", logs: mockLogs }, { status: 200 })
+  return NextResponse.json(
+    {
+      logs: mockLogs,
+      message:
+        "This is a mock build log endpoint. Actual Vercel build logs are accessed via the Vercel dashboard for security reasons.",
+    },
+    { status: 200 },
+  )
 }

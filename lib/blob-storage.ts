@@ -1,23 +1,33 @@
 import { put, del, list } from "@vercel/blob"
-import { customAlphabet } from "nanoid"
 
-const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10)
-
-export async function uploadFileToBlob(filename: string, file: File | Buffer, contentType: string) {
-  const fileExtension = filename.split(".").pop()
-  const newFilename = `${nanoid()}.${fileExtension}`
-  const blob = await put(newFilename, file, {
-    access: "public",
-    contentType,
-  })
-  return blob
+export async function uploadFileToBlob(filename: string, file: File): Promise<string> {
+  try {
+    const blob = await put(filename, file, {
+      access: "public",
+      addRandomSuffix: true,
+    })
+    return blob.url
+  } catch (error) {
+    console.error("Error uploading file to Vercel Blob:", error)
+    throw new Error("Failed to upload file to blob storage.")
+  }
 }
 
-export async function deleteFileFromBlob(url: string) {
-  await del(url)
+export async function deleteFileFromBlob(url: string): Promise<void> {
+  try {
+    await del(url)
+  } catch (error) {
+    console.error("Error deleting file from Vercel Blob:", error)
+    throw new Error("Failed to delete file from blob storage.")
+  }
 }
 
-export async function listFilesFromBlob(prefix?: string) {
-  const { blobs } = await list({ prefix })
-  return blobs
+export async function listFilesInBlob(): Promise<any[]> {
+  try {
+    const { blobs } = await list()
+    return blobs
+  } catch (error) {
+    console.error("Error listing files from Vercel Blob:", error)
+    throw new Error("Failed to list files from blob storage.")
+  }
 }

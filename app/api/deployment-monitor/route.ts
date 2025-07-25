@@ -11,14 +11,17 @@ export async function GET() {
     }
 
     const deploymentStatus = {
-      status: "active",
-      message: "Application is running and serving requests.",
-      timestamp: new Date().toISOString(),
+      status: "monitoring_active",
+      message: "Deployment monitoring endpoint is active.",
+      buildId: process.env.VERCEL_BUILD_ID || "N/A",
       commitSha: process.env.VERCEL_GIT_COMMIT_SHA || "N/A",
       commitRef: process.env.VERCEL_GIT_COMMIT_REF || "N/A",
-      buildId: process.env.VERCEL_BUILD_ID || "N/A",
-      vercelUrl: process.env.VERCEL_URL || "N/A",
-      nextAuthUrl: process.env.NEXTAUTH_URL || "N/A",
+      commitTimestamp: process.env.VERCEL_GIT_COMMIT_TIMESTAMP || "N/A",
+      region: process.env.VERCEL_REGION || "N/A",
+      environment: process.env.VERCEL_ENV || "N/A",
+      // Add more checks for critical components if needed
+      // e.g., 'authServiceStatus': await checkAuthService(),
+      timestamp: new Date().toISOString(),
       nodeVersion: process.version,
       dependencies: {
         next: require("next/package.json").version,
@@ -30,14 +33,7 @@ export async function GET() {
 
     return NextResponse.json(deploymentStatus, { status: 200 })
   } catch (error) {
-    return NextResponse.json(
-      {
-        status: "error",
-        message: error instanceof Error ? error.message : "Deployment monitoring failed",
-        timestamp: new Date().toISOString(),
-        error: true,
-      },
-      { status: 500 },
-    )
+    console.error("Deployment monitor failed:", error)
+    return NextResponse.json({ status: "error", message: (error as Error).message }, { status: 500 })
   }
 }
